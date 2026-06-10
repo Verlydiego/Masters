@@ -42,12 +42,11 @@
 					<div class="slide-content">
 						<p>The following material is necessary to comprehend this topic:</p>
 				    		<ul>
-				        	<li>Overview of stochastic processes</li>
-				        	<li>Standard random walk</li>
-				        	<li>Markov property</li>
-				        	<li>Definition of MJLS</li>
-				        	<li>Control approaches</li>
-				        	<li>General dynamic system</li>
+				        	<li>Overview of stochastic processes and the standard random walk;</li>
+				        	<li>Overview of the Markov property;</li>
+				        	<li>Definition of MJLS and an example;</li>
+				        	<li>Possible control approaches and its issues;</li>
+				        	<li>The general dynamic system;</li>
 				   			</ul>
 						</p>
 					</div>
@@ -60,358 +59,415 @@
 					</div>
 					<div class="slide-content">
 						<center>
-						<p>&nbsp;</p>
-	        			Costa, O. L. V.<br>
-				        Fragoso, M. D.<br>
-				        Marques, R. P.<br><br>
-				
-				        <b>Discrete-Time Markov Jump Linear Systems</b><br>
-				
-				        Springer, 2005.
+							<p>&nbsp;</p>
+							<u1>
+								<li><b>Costa, O. L. V.; Fragoso, M. D.;Marques, R. P.; Discrete-Time Markov Jump Linear Systems. Springer, 2005.</b></li>
+							</u1>
 						</center>
 				    </div>
 				</section>
 	
 				<!-- ====================================================== -->
 				<section>
-				    <h2>Course Topics</h2>
-				
-				    <ul>
-				        <li>Background Material</li>
-				        <li>Stability</li>
-				        <li>Quadratic and H₂ Optimal Control</li>
-				        <li>Filtering</li>
-				        <li>Quadratic Optimal Control with Partial Information</li>
-				        <li>H∞ Control</li>
-				        <li>Design Techniques</li>
-				        <li>Coupled Algebraic Riccati Equations</li>
-				    </ul>
+					<div class="slide-title">
+				    	<h2>Course Topics</h2>
+					</div>
+					<div class="slide-content">
+					    <ul>
+					        <li>Background Material</li>
+					        <li>Stability</li>
+					        <li>Quadratic Control</li>
+					    </ul>
+					</div>
 				</section>
 	
 				<!-- ====================================================== -->
 				<section>
-				    <h2>Introduction</h2>
-				
-				    <blockquote>
-				        "Models are, for the most part, caricatures of reality,
-				        but if they are good, then, like good caricatures,
-				        they portray, though perhaps in a distorted manner,
-				        some of the features of the real world."
-				    </blockquote>
-				
-				    <p><b>M. Kac</b></p>
+					<div class="slide-title">
+				    	<h2>Introduction</h2>
+					</div>
+					
+					<div class="slide-content">
+					    <blockquote>
+					        "Models are, for the most part, caricatures of reality,
+					        but if they are good, then, like good caricatures,
+					        they portray, though perhaps in a distorted manner,
+					        some of the features of the real world."
+					    </blockquote>
+							
+					    <p><b>M. Kac</b></p>
+					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
-				    <h2>Stochastic Processes</h2>
-				
-				    <p>
-				        A stochastic process is a mathematical tool for
-				        modeling time-dependent random phenomena.
-				    </p>
-				
-				    <div class="fragment">
-				        \[
-				        (X_t)_{t\in T}
-				        \]
-				    </div>
-				
-				    <div class="fragment">
-				        Represents a system that evolves through time.
-				    </div>
+					<div class="slide-title">
+				    	<h2>Stochastic Processes</h2>
+					</div>
+					
+					<div class="slide-content">
+					    <p>
+					        A stochastic process is a mathematical tool for
+					        modeling time-dependent random phenomena.
+					    </p>
+					
+					    <div class="fragment">
+					        \[
+					        (X_t)_{t\in T}
+					        \]
+					    </div>
+					
+					    <div class="fragment">
+					        Represents a system that evolves through time.
+					    </div>
+					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
-				    <h2>Standard Random Walk</h2>
-				
-				    <p>
-				        A simple unrestricted random walk
-				        starting at \(S_0=0\):
-				    </p>
-				
-				    \[
-				    S_n = \sum_{k=1}^{n} X_k
-				    \]
-				
-				    <ul>
-				        <li>\(S_n\): position at instant \(n\)</li>
-				        <li>\(X_k\): movement performed at step \(k\)</li>
-				    </ul>
+					<div class="slide-title">
+				    	<h2>Standard Random Walk</h2>
+					</div>
+					
+					<div class="slide-content">
+					    <p>
+					        A simple unrestricted random walk
+					        starting at \(S_0=0\):
+					    </p>
+					
+					    \[
+					    S_n = \sum_{k=1}^{n} X_k
+					    \]
+					
+					    <ul>
+					        <li>\(S_n\): position at instant \(n\)</li>
+					        <li>\(X_k\): movement performed at step \(k\)</li>
+					    </ul>
+					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
-				    <h2>The Markov Property</h2>
-				
-				    <p>
-				        The future depends only on the present state.
-				    </p>
-				
-				    <div class="highlight">
-				
-				    \[
-				    P(S_{n+1}=j \mid S_n=i_n,\ldots,S_1=i_1)
-				    =
-				    P(S_{n+1}=j \mid S_n=i_n)
-				    \]
-				
-				    </div>
-				
-				    <p class="fragment">
-				        The past becomes irrelevant once the current state is known.
-				    </p>
+					<div class="slide-title">
+				    	<h2>The Markov Property</h2>
+					</div>
+
+					<div class="slide-content">
+					    <p>
+					        The future depends only on the present state.
+					    </p>
+					
+					    <div class="highlight">
+					
+					    \[
+					    P(S_{n+1}=j \mid S_n=i_n,\ldots,S_1=i_1)
+					    =
+					    P(S_{n+1}=j \mid S_n=i_n)
+					    \]
+					
+					    </div>
+					
+					    <p class="fragment">
+					        The past becomes irrelevant once the current state is known.
+					    </p>
+					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
-				    <h2>Markov Jump Linear Systems</h2>
-				
-				    <p>
-				        Consider a set of dynamical systems:
-				    </p>
-				
-				    \[
-				    \{G_1,G_2,\ldots,G_N\}
-				    \]
-				
-				    <p class="fragment">
-				        The system switches among these operation modes.
-				    </p>
+					<div class="slide-title">
+				    	<h2>Markov Jump Linear Systems</h2>
+					</div>
+
+					<div class="slide-content">
+					    <p>
+					        Consider a set of dynamical systems:
+					    </p>
+					
+					    \[
+					    \{G_1,G_2,\ldots,G_N\}
+					    \]
+					
+					    <p class="fragment">
+					        The system switches among these operation modes.
+					    </p>
+					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
-				    <h2>MJLS Concept</h2>
-				
-				    <p>
-				        The switching process follows a Markov chain.
-				    </p>
-				
-				    <div class="fragment">
-				
-				    \[
-				    \theta(k)\in\{1,2,\ldots,N\}
-				    \]
-				
-				    </div>
-				
-				    <div class="fragment">
-				        \(\theta(k)\) identifies the current operation mode.
-				    </div>
+					<div class="slide-title">
+				    	<h2>MJLS Concept</h2>
+					</div>
+
+					<div class="slide-content">
+					    <p>
+					        The switching process follows a Markov chain.
+					    </p>
+					
+					    <div class="fragment">
+					
+					    \[
+					    \theta(k)\in\{1,2,\ldots,N\}
+					    \]
+					
+					    </div>
+					
+					    <div class="fragment">
+					        \(\theta(k)\) identifies the current operation mode.
+					    </div>
+					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
-				    <h2>Transition Probability Matrix</h2>
-				
-				    <p>
-				        The jumps are characterized by:
-				    </p>
-				
-				    \[
-				    P=
-				    \begin{bmatrix}
-				    p_{11}&p_{12}&\cdots&p_{1N}\\
-				    p_{21}&p_{22}&\cdots&p_{2N}\\
-				    \vdots&\vdots&\ddots&\vdots\\
-				    p_{N1}&p_{N2}&\cdots&p_{NN}
-				    \end{bmatrix}
-				    \]
-				
-				    <p class="fragment">
-				        Each row sums to one.
-				    </p>
+					<div class="slide-title">
+				    	<h2>Transition Probability Matrix</h2>
+					</div>
+
+					<div class="slide-content">
+					    <p>
+					        The jumps are characterized by:
+					    </p>
+					
+					    \[
+					    P=
+					    \begin{bmatrix}
+					    p_{11}&p_{12}&\cdots&p_{1N}\\
+					    p_{21}&p_{22}&\cdots&p_{2N}\\
+					    \vdots&\vdots&\ddots&\vdots\\
+					    p_{N1}&p_{N2}&\cdots&p_{NN}
+					    \end{bmatrix}
+					    \]
+					
+					    <p class="fragment">
+					        Each row sums to one.
+					    </p>
+					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
-				    <h2>Operation Mode</h2>
-				
-				    <p>
-				        At each instant:
-				    </p>
-				
-				    \[
-				    \theta(k)=i
-				    \]
-				
-				    <p>
-				        means the system is operating in mode \(G_i\).
-				    </p>
-				
-				    <div class="fragment">
-				        Throughout this course, we assume
-				        \(\theta(k)\) is known.
-				    </div>
+					<div class="slide-title">
+				    	<h2>Operation Mode</h2>
+					</div>
+
+					<div class="slide-content">
+					    <p>
+					        At each instant:
+					    </p>
+					
+					    \[
+					    \theta(k)=i
+					    \]
+					
+					    <p>
+					        means the system is operating in mode \(G_i\).
+					    </p>
+					
+					    <div class="fragment">
+					        Throughout this course, we assume
+					        \(\theta(k)\) is known.
+					    </div>
+					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
-				    <h2>Example: Two Operation Modes</h2>
-				
-				    \[
-				    G_1:\quad x(k+1)=0.8x(k)
-				    \]
-				
-				    <br>
-				
-				    \[
-				    G_2:\quad x(k+1)=1.2x(k)
-				    \]
-				
-				</section>
-				
-				<!-- ====================================================== -->
-				<section>
-				    <h2>Transition Matrix</h2>
-				
-				    \[
-				    P=
-				    \begin{bmatrix}
-				    0.7 & 0.3\\
-				    0.4 & 0.6
-				    \end{bmatrix}
-				    \]
-				
-				    <p>
-				        Assume \(\theta(0)=1\).
-				    </p>
-				</section>
-				
-				<!-- ====================================================== -->
-				<section>
-				    <h2>Possible Realizations</h2>
-				
-				    <p>
-				        For a horizon of 20 steps:
-				    </p>
-				
-				    \[
-				    2^{20}=1\,048\,576
-				    \]
-				
-				    <p class="fragment">
-				        Different Markov-chain realizations produce
-				        different trajectories.
-				    </p>
-				</section>
-				
-				<!-- ====================================================== -->
-				<section>
-				    <h2>Control Approaches</h2>
-				
-				    <ol>
-				        <li class="fragment">
-				            Robust Control Approach
-				        </li>
-				
-				        <li class="fragment">
-				            Multimodel Approach
-				        </li>
-				
-				        <li class="fragment">
-				            Markov Jump Approach
-				        </li>
-				    </ol>
-				</section>
-				
-				<!-- ====================================================== -->
-				<section>
-				    <h2>Robust Control</h2>
-				
-				    <ul>
-				        <li>Single control law</li>
-				        <li>Mode variations treated as disturbances</li>
-				        <li>May lead to conservative designs</li>
-				        <li>Performance degradation is expected</li>
-				    </ul>
-				</section>
-				
-				<!-- ====================================================== -->
-				<section>
-				    <h2>Multimodel Control</h2>
-				
-				    <ul>
-				        <li>One controller per operation mode</li>
-				        <li>Usually better performance</li>
-				        <li>Stability issues remain</li>
-				    </ul>
-				
-				    <div class="fragment">
-				
-				        <b>Question:</b>
-				
-				        <br><br>
-				
-				        Are the best individual controllers also the best overall controller?
-				
-				    </div>
-				</section>
-				
-				<!-- ====================================================== -->
-				<section>
-				    <h2>Answer</h2>
-				
-				    <h1 style="color:#aa0000;">
-				        Not Necessarily!
-				    </h1>
-				</section>
-				
-				<!-- ====================================================== -->
-				<section>
-				    <h2>Markov Jump Approach</h2>
-				
-				    <ul>
-				        <li>Explicitly considers transition probabilities</li>
-				        <li>Uses stochastic information</li>
-				        <li>Usually provides better long-term performance</li>
-				    </ul>
-				</section>
-				
-				<!-- ====================================================== -->
-				<section>
-				    <h2>General Dynamic System</h2>
-				
-				\[
-				\begin{aligned}
-				x(k+1)&=A_{\theta(k)}x(k)
-				+B_{\theta(k)}u(k)
-				+G_{\theta(k)}w(k)
-				\\[4mm]
-				y(k)&=L_{\theta(k)}x(k)
-				+H_{\theta(k)}w(k)
-				\\[4mm]
-				z(k)&=C_{\theta(k)}x(k)
-				+D_{\theta(k)}u(k)
-				\end{aligned}
-				\]
+					<div class="slide-title">
+				    	<h2>Example: Two Operation Modes</h2>
+					</div>
+
+					<div class="slide-content">
+					    \[
+					    G_1:\quad x(k+1)=0.8x(k)
+					    \]
+					
+					    <br>
+					
+					    \[
+					    G_2:\quad x(k+1)=1.2x(k)
+					    \]
+					</div>
 				
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
-				    <h2>Required Background</h2>
-				
-				    <ul>
-				        <li>Notations, norms and spaces</li>
-				        <li>Probability theory</li>
-				        <li>Linear systems theory</li>
-				        <li>Linear Matrix Inequalities (LMIs)</li>
-				    </ul>
+					<div class="slide-title">
+				    	<h2>Transition Matrix</h2>
+					</div>
+
+					<div class="slide-content">
+					    \[
+					    P=
+					    \begin{bmatrix}
+					    0.7 & 0.3\\
+					    0.4 & 0.6
+					    \end{bmatrix}
+					    \]
+					
+					    <p>
+					        Assume \(\theta(0)=1\).
+					    </p>
+					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
-				    <h1>Next Class</h1>
-				
-				    <h3>Background Material</h3>
-				
-				    <p>
-				        Probability spaces, norms and preliminaries.
-				    </p>
+					<div class="slide-title">
+				    	<h2>Possible Realizations</h2>
+					</div>
+					
+					<div class="slide-content">
+					    <p>
+					        For a horizon of 20 steps:
+					    </p>
+					
+					    \[
+					    2^{20}=1\,048\,576
+					    \]
+					
+					    <p class="fragment">
+					        Different Markov-chain realizations produce
+					        different trajectories.
+					    </p>
+					</div>
 				</section>
+				
+				<!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+				    	<h2>Control Approaches</h2>
+					</div>
+
+					<div class="slide-content">
+					    <ol>
+					        <li class="fragment">
+					            Robust Control Approach
+					        </li>
+					
+					        <li class="fragment">
+					            Multimodel Approach
+					        </li>
+					
+					        <li class="fragment">
+					            Markov Jump Approach
+					        </li>
+					    </ol>
+					</div>
+				</section>
+				
+				<!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+				    	<h2>Robust Control</h2>
+					</div>
+					
+					<div class="slide-content">
+					    <ul>
+					        <li>Single control law</li>
+					        <li>Mode variations treated as disturbances</li>
+					        <li>May lead to conservative designs</li>
+					        <li>Performance degradation is expected</li>
+					    </ul>
+					</div>
+				</section>
+				
+				<!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+				    	<h2>Multimodel Control</h2>
+					</div>
+					
+					<div class="slide-content">
+					    <ul>
+					        <li>One controller per operation mode</li>
+					        <li>Usually better performance</li>
+					        <li>Stability issues remain</li>
+					    </ul>
+					
+					    <div class="fragment">
+					
+					        <b>Question:</b>
+					
+					        <br><br>
+					
+					        Are the best individual controllers also the best overall controller?
+					
+					    </div>
+					</div>
+				</section>
+				
+				<!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+				    	<h2>Answer</h2>
+					</div>
+
+					<div class="slide-content">
+					    <h1 style="color:#aa0000;">
+					        Not Necessarily!
+					    </h1>
+					</div>
+				</section>
+				
+				<!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+				    	<h2>Markov Jump Approach</h2>
+					</div>
+
+					<div class="slide-content">
+					    <ul>
+					        <li>Explicitly considers transition probabilities</li>
+					        <li>Uses stochastic information</li>
+					        <li>Usually provides better long-term performance</li>
+					    </ul>
+					</div>
+				</section>
+				
+				<!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+				    	<h2>General Dynamic System</h2>
+					</div>
+
+					<div class="slide-content">
+						\[
+						\begin{aligned}
+						x(k+1)&=A_{\theta(k)}x(k)
+						+B_{\theta(k)}u(k)
+						+G_{\theta(k)}w(k)
+						\\[4mm]
+						y(k)&=L_{\theta(k)}x(k)
+						+H_{\theta(k)}w(k)
+						\\[4mm]
+						z(k)&=C_{\theta(k)}x(k)
+						+D_{\theta(k)}u(k)
+						\end{aligned}
+						\]
+					</div>
+				
+				</section>
+				
+				<!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+				    	<h2>Required Background</h2>
+					</div>
+
+					<div class="slide-content">
+					    <ul>
+					        <li>Notations, norms and spaces</li>
+					        <li>Probability theory</li>
+					        <li>Linear systems theory</li>
+					        <li>Linear Matrix Inequalities (LMIs)</li>
+					    </ul>
+					</div>
+				</section>
+				
+				<!-- ====================================================== -->
 	
 			</div>
 		</div>
