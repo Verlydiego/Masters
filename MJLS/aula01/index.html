@@ -88,12 +88,12 @@
 					</div>
 					
 					<div class="slide-content">
-					    <blockquote>
+					    <p class="lightup">
 					        "Models are, for the most part, caricatures of reality,
 					        but if they are good, then, like good caricatures,
 					        they portray, though perhaps in a distorted manner,
 					        some of the features of the real world."
-					    </blockquote>
+						</p>
 						<center>
 					    	<p><b>M. Kac</b></p>
 						</center>
@@ -136,8 +136,8 @@
 							where:
 						</p>
 					    <ul>
-					        <li>\(S_n\): position at instant \(n\)</li>
-					        <li>\(X_k\): movement performed at step \(k\)</li>
+					        <li>\(S_n\): value or position of the process at instant \(n\)</li>
+					        <li>\(X_k\): specific movement performed at step \(k\)</li>
 					    </ul>
 					</div>
 				</section>
@@ -150,22 +150,21 @@
 
 					<div class="slide-content">
 					    <p>
-					        The future depends only on the present state.
+					        A process is Markov when its statistical behavior after time \(t\)
+							can be recovered from the value \(X_t\) of the process at time \(t\).
+							In particular, the values \(X_s\) of the process at time \(s \in [0,t)\)
+							have no influence whatsoever on this behavior as long as the value of \(x_t\)
+							is known.
 					    </p>
 					
-					    <div class="highlight">
-					
-					    \[
-					    P(S_{n+1}=j \mid S_n=i_n,\ldots,S_1=i_1)
-					    =
-					    P(S_{n+1}=j \mid S_n=i_n)
-					    \]
-					
-					    </div>
-					
-					    <p class="fragment">
-					        The past becomes irrelevant once the current state is known.
-					    </p>
+					    <p class="lightup">
+						    \[
+						    P(S_{n+1}=j \mid S_n=i_n,\ldots,S_1=i_1)
+						    =
+						    P(S_{n+1}=j \mid S_n=i_n)
+						    \]
+						</p>
+						
 					</div>
 				</section>
 				
