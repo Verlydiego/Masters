@@ -180,6 +180,28 @@
 							that jumps from one mode to the other:
 					    </p>
 
+						<center>
+							<img src="images/MJLS_nop.jpg" style="width:80%;">
+						</center>
+						
+					</div>
+				</section>
+
+				<!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+				    	<h2>Markov Jump Linear Systems (MJLS)</h2>
+					</div>
+
+					<div class="slide-content">
+					    <p>
+					        If the jumps evolve stochastically according to a Markov chain,
+							we know the jump probability for each of the other models:
+					    </p>
+
+						<center>
+							<img src="images/MJLS_p.jpg" style="width:80%;">
+						</center>
 						
 					</div>
 				</section>
@@ -187,118 +209,106 @@
 				<!-- ====================================================== -->
 				<section>
 					<div class="slide-title">
-				    	<h2>MJLS Concept</h2>
+				    	<h2>Markov Jump Linear Systems (MJLS)</h2>
 					</div>
 
 					<div class="slide-content">
 					    <p>
-					        The switching process follows a Markov chain.
+					        Based on this diagram it can be created the transition probability matrix:
 					    </p>
+						
+						<p class="lightup">
+							\[
+							P=
+							\begin{bmatrix}
+								0&p_{12}&p_{13}&0&0\\
+								0&0&p_{23}&p_{24}&0\\
+								p_{31}&0&0&0&p_{35}\\
+								0&p_{42}&0&0&0\\
+								9&p_{52}&0&p_{54}&0
+							\end{bmatrix}
+							\]
+						</p>
 					
-					    <div class="fragment">
-					
-					    \[
-					    \theta(k)\in\{1,2,\ldots,N\}
-					    \]
-					
-					    </div>
-					
-					    <div class="fragment">
-					        \(\theta(k)\) identifies the current operation mode.
-					    </div>
 					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
 					<div class="slide-title">
-				    	<h2>Transition Probability Matrix</h2>
+				    	<h2>Markov Jump Linear Systems (MJLS)</h2>
 					</div>
 
 					<div class="slide-content">
 					    <p>
-					        The jumps are characterized by:
+					        We can associate each of these models to an operation mode 
+							of the system \(\theta(k)\) that acts as the "pointer" that identifies
+							which node the system is at time k.
 					    </p>
+
+						<p>
+							For example, if your system is currently at note \(\mathcal{G}_3\), then 
+							\(\theta(k)=3\).
+						</p>
+
+						<p>
+							By now, we will assume that the current operation mode \(\theta(k)\) is known
+							at each instant \(k\), unless otherwise stated.
+						</p>
 					
-					    \[
-					    P=
-					    \begin{bmatrix}
-					    p_{11}&p_{12}&\cdots&p_{1N}\\
-					    p_{21}&p_{22}&\cdots&p_{2N}\\
-					    \vdots&\vdots&\ddots&\vdots\\
-					    p_{N1}&p_{N2}&\cdots&p_{NN}
-					    \end{bmatrix}
-					    \]
-					
-					    <p class="fragment">
-					        Each row sums to one.
-					    </p>
 					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
 					<div class="slide-title">
-				    	<h2>Operation Mode</h2>
+				    	<h2>Example - 2 Operation Modes</h2>
 					</div>
 
 					<div class="slide-content">
 					    <p>
-					        At each instant:
+					        Consider a system with two operation modes:
 					    </p>
-					
-					    \[
-					    \theta(k)=i
-					    \]
-					
-					    <p>
-					        means the system is operating in mode \(G_i\).
-					    </p>
-					
-					    <div class="fragment">
-					        Throughout this course, we assume
-					        \(\theta(k)\) is known.
-					    </div>
+						
+						<p class="lightup" style="font-size: 0.8em;">
+							\[
+								\mathcal{G}_1:\quad x(k+1)=0.8x(k)
+								\\\mathcal{G}_2:\quad x(k+1)=1.2x(k)
+					    	\]
+						</p>
+					    
+
+						<center>
+							<img src="images/Fig5.jpg" style="width:50%;">
+						</center>
+					    
 					</div>
 				</section>
+				
 				
 				<!-- ====================================================== -->
 				<section>
 					<div class="slide-title">
-				    	<h2>Example: Two Operation Modes</h2>
+				    	<h2>Example - 2 Operation Modes</h2>
 					</div>
 
 					<div class="slide-content">
-					    \[
-					    G_1:\quad x(k+1)=0.8x(k)
-					    \]
-					
-					    <br>
-					
-					    \[
-					    G_2:\quad x(k+1)=1.2x(k)
-					    \]
-					</div>
-				
-				</section>
-				
-				<!-- ====================================================== -->
-				<section>
-					<div class="slide-title">
-				    	<h2>Transition Matrix</h2>
-					</div>
+						<p>
+							The transition probability matrix is given by:
+						</p>
 
-					<div class="slide-content">
-					    \[
-					    P=
-					    \begin{bmatrix}
-					    0.7 & 0.3\\
-					    0.4 & 0.6
-					    \end{bmatrix}
-					    \]
-					
+						<p class="lightup">
+							\[
+								P=
+								\begin{bmatrix}
+								0.7 & 0.3\\
+								0.4 & 0.6
+								\end{bmatrix}
+							\]
+						</p>
+					    
 					    <p>
-					        Assume \(\theta(0)=1\).
+					        Consider \(\theta(k)\) for \(k = 0,1,\ldots,20\) and \(\theta(0)=1\).
 					    </p>
 					</div>
 				</section>
@@ -306,22 +316,60 @@
 				<!-- ====================================================== -->
 				<section>
 					<div class="slide-title">
-				    	<h2>Possible Realizations</h2>
+				    	<h2>Example - 2 Operation Modes</h2>
 					</div>
 					
 					<div class="slide-content">
 					    <p>
-					        For a horizon of 20 steps:
+					        In this case, the markov chain may present \(2^{20} = 1048576\)
+							different realizations.
 					    </p>
+
+						<p>
+							A randomly chosen realization of the Markov chain is given by:
+						</p>
+
+						<p class="lightup">
+							\[
+							\theta(k) = \{1,2,1,2,1,2,2,2,2,1,1,1,1,1,1,1,2,2,1,1,2\}
+							\]
+						</p>
 					
-					    \[
-					    2^{20}=1\,048\,576
-					    \]
 					
-					    <p class="fragment">
-					        Different Markov-chain realizations produce
-					        different trajectories.
+					    <p>
+					        when the initial state is \(x(0)=1\), the system trajectory is
+							presented in the next page.
 					    </p>
+					</div>
+				</section>
+
+				<!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+				    	<h2>Example - 2 Operation Modes</h2>
+					</div>
+					
+					<div class="slide-content">
+					    <center>
+							<img src="images/Fig.3.jpg" style="width:65%;">
+						</center>
+					</div>
+				</section>
+
+				<!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+				    	<h2>Example - 2 Operation Modes</h2>
+					</div>
+					
+					<div class="slide-content">
+						<p>
+							Different realizations of the Markov chain will lead to
+							a multitude of very similar trajectories:
+						</p>
+					    <center>
+							<img src="images/Fig.4.jpg" style="width:50%;">
+						</center>
 					</div>
 				</section>
 				
@@ -332,34 +380,27 @@
 					</div>
 
 					<div class="slide-content">
-					    <ol>
-					        <li class="fragment">
-					            Robust Control Approach
-					        </li>
-					
-					        <li class="fragment">
-					            Multimodel Approach
-					        </li>
-					
-					        <li class="fragment">
-					            Markov Jump Approach
-					        </li>
-					    </ol>
-					</div>
-				</section>
-				
-				<!-- ====================================================== -->
-				<section>
-					<div class="slide-title">
-				    	<h2>Robust Control</h2>
-					</div>
-					
-					<div class="slide-content">
+						<p>
+							We could consider three approaches to control the system:
+						</p>
 					    <ul>
-					        <li>Single control law</li>
-					        <li>Mode variations treated as disturbances</li>
-					        <li>May lead to conservative designs</li>
-					        <li>Performance degradation is expected</li>
+					        <li class="fragment">
+					            One single control law: The differences in the dynamic behavior due
+								to the changes in the operation mode are treated as disturbances.
+								This would be a kind of <b>Standard Robust Control</b> approach.
+					        </li>
+					
+					        <li class="fragment">
+					            Two control laws: Each of the control laws is independently designed
+								and changes when the operation mode changes. This could be called
+								<b>Multimodel</b> approach.
+					        </li>
+					
+					        <li class="fragment">
+					            Two control laws: They are designed considering the Markov nature
+								of the jumps between operation modes. This could be called
+								<b>Markov Jump</b> approach.
+					        </li>
 					    </ul>
 					</div>
 				</section>
@@ -367,52 +408,58 @@
 				<!-- ====================================================== -->
 				<section>
 					<div class="slide-title">
-				    	<h2>Multimodel Control</h2>
+				    	<h2>Robust Control Approach - Issues:</h2>
 					</div>
 					
 					<div class="slide-content">
 					    <ul>
-					        <li>One controller per operation mode</li>
-					        <li>Usually better performance</li>
-					        <li>Stability issues remain</li>
+							<p>&nbsp;</p>
+					        <li>One would expect poorer performance, especially when system dynamics
+								for each operation mode differ significantly.</li>
+					        <li>Also, due to the random switching between operation modes, 
+								in a time-variant system, the stability guarantees of most of the
+								standard design techniques can be compromised.
+							</li>
 					    </ul>
-					
-					    <div class="fragment">
-					
-					        <b>Question:</b>
-					
-					        <br><br>
-					
-					        Are the best individual controllers also the best overall controller?
-					
-					    </div>
 					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
 					<div class="slide-title">
-				    	<h2>Answer</h2>
+				    	<h2>Multimodel Control Approach - Issues:</h2>
 					</div>
-
+					
 					<div class="slide-content">
-					    <h1 style="color:#aa0000;">
-					        Not Necessarily!
-					    </h1>
+					    <ul>
+							<p>&nbsp;</p>
+					        <li>On a first analysis, present better performance.</li>
+					        <li>Stability issues still remain.</li>
+					        <li><b>Question:</b>Would the best controllers for each operation mode when
+							associated, result in the best controller for the overall system?</li>
+					    </ul>
+						<center>
+							<h1 class="fragment" style="color:#aa0000;">
+								Not Necessarily!</li>
+							</h1>
+						</center>
+						
 					</div>
 				</section>
 				
 				<!-- ====================================================== -->
 				<section>
 					<div class="slide-title">
-				    	<h2>Markov Jump Approach</h2>
+				    	<h2>Markov Jump Approach - Issues</h2>
 					</div>
 
 					<div class="slide-content">
 					    <ul>
-					        <li>Explicitly considers transition probabilities</li>
-					        <li>Uses stochastic information</li>
-					        <li>Usually provides better long-term performance</li>
+							<p>&nbsp;</p>
+					        <li>For a specific unfavorable sequence of operation modes,
+								the performance may be very poor, but in the long run, or for
+								a great number of sequences, it is likely to present the best results.
+							</li>
 					    </ul>
 					</div>
 				</section>
@@ -424,19 +471,26 @@
 					</div>
 
 					<div class="slide-content">
-						\[
-						\begin{aligned}
-						x(k+1)&=A_{\theta(k)}x(k)
-						+B_{\theta(k)}u(k)
-						+G_{\theta(k)}w(k)
-						\\[4mm]
-						y(k)&=L_{\theta(k)}x(k)
-						+H_{\theta(k)}w(k)
-						\\[4mm]
-						z(k)&=C_{\theta(k)}x(k)
-						+D_{\theta(k)}u(k)
-						\end{aligned}
-						\]
+					    <p class="lightup">
+							\[
+								\begin{aligned}
+								x(k+1)&=A_{\theta(k)}x(k)
+								+B_{\theta(k)}u(k)
+								+G_{\theta(k)}w(k)
+								\\[4mm]
+								y(k)&=L_{\theta(k)}x(k)
+								+H_{\theta(k)}w(k)
+								\\[4mm]
+								z(k)&=C_{\theta(k)}x(k)
+								+D_{\theta(k)}u(k)
+								\end{aligned}
+							\]
+						</p>
+
+						<p>
+							With initial conditions \(x_0\) and \(\theta_0\).
+						</p>
+						
 					</div>
 				
 				</section>
@@ -448,11 +502,14 @@
 					</div>
 
 					<div class="slide-content">
+						<p>
+							The following material is necessary to comprehend this topic:
+						</p>
 					    <ul>
-					        <li>Notations, norms and spaces</li>
-					        <li>Probability theory</li>
-					        <li>Linear systems theory</li>
-					        <li>Linear Matrix Inequalities (LMIs)</li>
+					        <li>Notations, norms and spaces;</li>
+					        <li>Probability Space;</li>
+					        <li>Linear systems theory;</li>
+					        <li>Linear Matrix Inequalities (LMIs).</li>
 					    </ul>
 					</div>
 				</section>
