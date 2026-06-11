@@ -69,7 +69,31 @@
 	    				<h2>MJLS:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Consider the following homogeneous MJLS (\(\mathcal{G}\)):
+                        </p>
+
+                        \[
+                            \mathcal{G} =
+                            \begin{cases}
+                                x_{k+1} = A_{\theta_k}x_k + B_{\theta_k}u_k\\
+                                z_k = C_{\theta_k}x_k + D_{\theta_k}u_k
+                            \end{cases}
+                        \]
+
+                        <p>
+                            If \(\theta_k = i\):
+                        </p>
+
+                        \[
+                            A_{\theta_k} = A_i \in \{A_1, \ldots, A_N\}
+                            \quad
+                            B_{\theta_k} = B_i \in \{B_1, \ldots, B_N\}
+                            \\
+                            C_{\theta_k} = C_i \in \{C_1, \ldots, C_N\}
+                            \quad
+                            D_{\theta_k} = D_i \in \{D_1, \ldots, D_N\}
+                        \]
 				    </div>
 				</section>
 
@@ -79,9 +103,39 @@
 	    				<h2>Quadratic Optimal Control Problem:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            The infinite horizon expected quadratic cost associated to \(\mathcal{G}\)
+                            is denoted by:
+                        </p>
+
+                        \[
+                            \mathfrak{J}(x_k,u_k,\theta_k) = \mathbb{E}\left[\sum_{k=0}^{\infty}{(x_k^*Q_{\theta_k}x_k + u_k^*R_{\theta_k}u_k)}\right]
+                        \]
+
 				    </div>
 				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Quadratic Optimal Control Problem:</h2>
+					</div>
+					<div class="slide-content">
+						
+
+                        <p>
+                            And its correspondent in the finite horizon:
+                        </p>
+
+                        \[
+                            \mathfrak{J}(x_N,u_N,\theta_N,N) = \mathbb{E}\left[x_N*Q_Nx_N\sum_{k=0}^{N-1}{(x_k^*Q_{\theta_k}x_k + u_k^*R_{\theta_k}u_k)}\right]
+                        \]
+                        <p>
+                            We want to design a controller that minimizes this cost.
+                        </p>
+				    </div>
+				</section>
+
 
                 <!-- ====================================================== -->
 				<section>
@@ -89,7 +143,24 @@
 	    				<h2>Operators:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Assume that the Markov chain has time-invariant transition probabilities.
+                            Define the following operators:
+                        </p>
+
+                        \[
+                            \mathcal{E}(P) \triangleq (\mathcal{E}_1(P), \ldots, \mathcal{E}_N(P))
+                        \]
+
+                        \[
+                            \mathcal{E}_i(P) \triangleq \sum_{j=1}{N}{p_{ij}P_j}
+                        \]
+
+                        <p>
+                            where \(P\) is the solution to a set of coupled Lyapunov equations.
+                            And \(p_{ij}\) is the component of the i-th row and j-th column of the
+                            transition probability matrix.
+                        </p>
 				    </div>
 				</section>
 
@@ -99,7 +170,25 @@
 	    				<h2>Optimal Control - LQR:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Mathematical programming (optimization) problem:
+                        </p>
+
+                        \[
+                            \bar{\mathfrak{J}}_k(x_k) = \mathbb{E}\left[\min_{u_k}x_k^*Q_{\theta_k}x_k + u_k^*R_{\theta_k}u_k + \mathfrak{J}_{k+1}(x_{k+1})\right]
+                        \]
+
+                        <p>
+                            where the optimal cost at moment \(k\) is \(\mathfrak{J} = x_k^*P_kx_k\).
+                        </p>
+
+                        <p>
+                            Consider the Mode-Based Representation, when the Markov chain is in mode \(\theta_k = i\):
+                        </p>
+
+                        \[
+                            x_{k+1} = A_ix_k + B_iu_k
+                        \]
 				    </div>
 				</section>
 
@@ -109,7 +198,26 @@
 	    				<h2>Optimal Control - LQR:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Making the substitution:
+                        </p>
+
+                        \[
+                            x_k^*P_ix_k = \min_{u_k} x_k^*Q_ix_k + u_k^*R_iu_k + x_{k+1}^*\mathbb{E}[P_i]x_{k+1}
+                        \]
+
+                        \[
+                            x_k^*P_ix_k = \min_{u_k} x_k^*Q_ix_k + u_k^*R_iu_k + x_{k+1}^*\mathcal{E}_ix_{k+1}
+                        \]
+
+                        <p>
+                            But we know that \(x_{k+1} = A_ix_k + B_iu_k\). Therefore:
+                        </p>
+
+                        \[
+                            x_k^*P_ix_k = \min_{u_k} x_k^*Q_ix_k + u_k^*R_iu_k + \\(A_ix_k + B_iu_k)^*\mathcal{E}_i(A_ix_k + B_iu_k)
+                        \]
+                        
 				    </div>
 				</section>
 
@@ -118,8 +226,48 @@
 					<div class="slide-title">
 	    				<h2>Optimal Control - LQR:</h2>
 					</div>
-					<div class="slide-content">
-						<p></p>
+					<div class="slide-content" style="font-size: 0.95em;">
+						<p>
+                            Taking the derivative and setting it equal zero we get the optimal control input (\(\bar{u}\)):
+                        </p>
+
+                        \[
+                            \bar{u}_k = -(B_i^*\mathcal{E}_iB_i + R_i)^{-1}B_i^*\mathcal{E}_iA_ix_k
+                        \]
+
+                        <p>
+                            Substituting it in the cost equation:
+                        </p>
+
+                        \[
+                            x_k^*P_ix_k = x_k^*\left(A_i^*\mathcal{E}_iA_i - A_i^*\mathcal{E}_iB_i(R_i + B_i^*\mathcal{E}_iB_i)^{-1}B_i^*\mathcal{E}_iA_i + Q_i\right)x_k
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Optimal Control - LQR:</h2>
+					</div>
+					<div class="slide-content" style="font-size: 0.95em;">
+						<p>
+                            Therefore, the optimal matrices \(P_i \succeq 0\) are the
+                            unique solution of the Coupled Algebraic Riccati Equations (CAREs):
+                        </p>
+
+                        \[
+                            A_i^*\mathcal{E}_iA_i - A_i^*\mathcal{E}_iB_i(R_i + B_i^*\mathcal{E}_iB_i)^{-1}B_i^*\mathcal{E}_iA_i + Q_i
+                        \]
+
+                        <p>
+                            Where:
+                        </p>
+
+                        \[
+                            R_i = D_i^*D_i \quad Q_i = C_i^*C_i
+                        \]
+
 				    </div>
 				</section>
 
@@ -129,7 +277,21 @@
 	    				<h2>Stabilization of MJLS via LMIs:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Define:
+                        </p>
+
+                        \[
+                            \bar{u}_k = -K_ix_k
+                        \]
+
+                        <p>
+                            Such that:
+                        </p>
+
+                        \[
+                            K_i = (B_i^*\mathcal{E}_iB_i + R_i)^{-1}B_i^*\mathcal{E}_iA_i
+                        \]
 				    </div>
 				</section>
 
@@ -139,19 +301,111 @@
 	    				<h2>Stabilization of MJLS via LMIs:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            We can rewrite the solution of the CAREs to grant stability via Lyapunov Theorem:
+                        </p>
+
+                        \[
+                            (A_i - B_iK_i)^*\mathcal{E}_i(A_i - B_iK_i) - P_i \prec 0, \quad \forall i \in \mathbb{K}
+                        \]
+
+                        <p>
+                            Apply a congruence transformation with \(P_i^{-1}\):
+                        </p>
+
+                        \[
+                            P_i^{-1}(A_i - B_iK_i)^*\mathcal{E}_i(A_i - B_iK_i)P_i^{-1} - P_i^{-1}P_iP_i^{-1} \prec 0, \quad \forall i \in \mathbb{K}
+                        \]
 				    </div>
 				</section>
 
                 <!-- ====================================================== -->
 				<section>
 					<div class="slide-title">
-	    				<h2></h2>
+	    				<h2>Stabilization of MJLS via LMIs:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Let \(W_i = P_i^{-1}\) and \(Z_i = K_iW_i\), thus:
+                        </p>
+
+                        \[
+                        W_i(A_i - B_iK_i)^*\mathcal{E}_i(A_i - B_iK_i)W_i - W_i \prec 0
+                        \]
+
+                        \[
+                        (W_iA_i^* - Z_i^*B_i^*)\mathcal{E}_i(A_iW_i - B_iZ_i) - W_i \prec 0
+                        \]
 				    </div>
 				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Stabilization of MJLS via LMIs:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Define:
+                        </p>
+
+                        \[
+                            \Phi_i = (A_iW_i - B_iZ_i)
+                        \]
+
+                        <p>
+                            Therefore:
+                        </p>
+
+                        \[
+                            \Phi_i^*\left(\sum_{j=1}^{N}{p_{ij}W_j^{-1}}\right)\Phi_i - W_i \prec 0
+                        \]
+
+                        \[
+                            \sum_{j=1}^{N}{\sqrt{p_{ij}}\Phi_i^*W_j^{-1}\sqrt{p_{ij}}\Phi_i} - W_i \prec 0
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Stabilization of MJLS via LMIs:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            And for any \(N\), applying the Schur complement yields:
+                        </p>
+
+                        \[
+                            W_i - 
+                            \begin{bmatrix}
+                                \sqrt{p_{ij}}\Phi_i^* & \ldots & \sqrt{p_{ij}}\Phi_i^*
+                            \end{bmatrix}
+                            \begin{bmatrix}
+                                W_1^{-1} & \ldots & 0\\
+                                \vdots & \ddots & \vdots\\
+                                0 & \ldots & W_N^{-1}
+                            \end{bmatrix}
+                            \begin{bmatrix}
+                                \sqrt{p_{ij}}\Phi_i^*\\
+                                \vdots
+                                \sqrt{p_{ij}}\Phi_i^*
+                            \end{bmatrix}
+                        \]
+
+                        \[
+                            \begin{bmatrix}
+                                W_i & \star & \star\\
+                                \sqrt{p_{ij}}(A_iW_i - B_iZ_i) & W_1 & \ldots & 0\\
+                                \vdots & \vdots & \ddots & \vdots\\
+                                \sqrt{p_{ij}}(A_iW_i - B_iZ_i) & 0 & \ldots & W_N
+                            \end{bmatrix} \succ 0
+                            \quad \forall i \in \mathbb{K}
+                        \]
+				    </div>
+				</section>
+
             </div>
         </div>
 
