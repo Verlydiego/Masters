@@ -1,0 +1,1056 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	
+        <title>MJLS - Class 3</title>
+
+        <link rel="stylesheet" href="../../dist/reset.css">
+        <link rel="stylesheet" href="../../dist/reveal.css">
+        <link rel="stylesheet" href="../../dist/theme/white.css" id="theme">
+
+        <!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="../../plugin/highlight/monokai.css" id="highlight-theme">
+		<link rel="stylesheet" href="../../style.css">
+	</head>
+
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+				<!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="title">
+					<h1>Discrete-Time Markov Jump Systems</h1>
+					</div>
+	    			<p>Class 3: Background Material - Probabilistic Space</p>
+					<div class="author">
+	    			<h3>Diego Verly</h3>
+					</div>
+						<div>
+	    				<p style="text-align: center;font-size: 0.8em;">May 2026</p>
+					</div>
+				</section>
+	
+				<!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+				    	<h2>Objectives:</h2>
+					</div>
+					<div class="slide-content">
+						<p>The objects of this presentations are an overview of:</p>
+				    		<ul>
+				        	<li>Probabilistic Spaecs and Measurability;</li>
+				        	<li>Random Variables and Joint Distributions;</li>
+				        	<li>Conditional probabilities and expectation;</li>
+				        	<li>Random sums and products;</li>
+				        	<li>Characteristic function;</li>
+                            <li>Moment and Probability generating functions;</li>
+                            <li>Cumulants and Moments.</li>
+				   			</ul>
+						</p>
+					</div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Bibliography</h2>
+					</div>
+					<div class="slide-content">
+						<p>&nbsp;</p>
+						<u1>
+							<li><b>[1]COSTA, O. L. V.; Fragoso, M. D.; Marques, R. P.; Discrete-Time Markov Jump Linear Systems. Springer, 2005.</b></li>
+                            <li><b>[2]PRIVAULT, N.; Understanding Markov Chains. Springer, 2013</b></li>
+						</u1>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Probabilistic Spaces and Events:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            A probability space is an abstract set \(\Omega\) that contains
+                            the possible outcomes of a random experiment. Probability spaces
+                            can also be built as product space \((\{\cdot\} \times \{\cdot\})\)
+                        </p>
+
+                        <p>
+                            An event \(A\) is a collection of outcomes, which is represented as a
+                            subset of \(\Omega\). The collection \(\mathcal{G}\) of events that we
+                            will consider are called \(\sigma\)-algebras, and assumed to satisfy the following
+                            conditions:
+                        </p>
+
+                        <ul>
+                            <li>\(\emptyset \in \mathcal{G}\)</li>
+                            <li>For all countable sequences \(A_n \in \mathcal{G}, n \geq 1\),
+                                we have \(\cup_{n \geq 1}A_n \in \mathcal{G}\);</li>
+                            <li>\(A \in \mathcal{G} \to (\Omega \backslash A) \in \mathcal{G},
+                                \quad
+                                \Omega \backslash A = \{\omega \in \Omega: \omega \not\in A\}\)
+                            </li>
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Probability Measures:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The collection of all events in \(\Omega\) will be denoted by \(\mathcal{F}\).
+                            The Borel \(\sigma\)-field is the smallest \(\sigma\)-algebra containing all
+                            open sets of a space.
+                        </p>
+
+                        <p>
+                            A probability measure is a mapping \(\mathbb{P} : \mathcal{F} \to [0,1]\)
+                            that assigns a probability \(\mathbb{P}(A) \in [0,1]\) to any event \(A\)
+                            and \(B\), with the properties:
+                        </p>
+
+                        <ul>
+                            <li>\(\mathbb{P}(\Omega) = 1\);</li>
+                            <li>\(\mathbb{P}(\cup_{n=1}^{\infty}A_n) = \sum_{n=1}^{\infty}{\mathbb{P}(A_n)}, \quad A_k \cap A_l = \emptyset, k \neq l\);
+                            <li>\(\mathbb{P}(A \cup B) = \mathbb{P}(A) + \mathbb{P}(B) - \mathbb{P}(A \cap B)\)</li>
+                        </ul>
+
+                        <p>
+                            Kolmogorov Framework is the triple (\(\Omega,\mathcal{F},\mathbb{P}\)).
+                        </p>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Conditional Probabilities:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Given any two events \(A,B \subset \Omega\) with \(\mathbb{P}(B) \neq 0\)
+                            we have \(A\) given \(B\) (or \(A\) conditionally to \(B\)):
+                        </p>
+
+                        \[
+                            \mathbb{P}(A \mid B) := \frac{\mathbb{P}(A \cap B)}{\mathbb{P}(B)}
+                        \]
+
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Conditional Probabilities:</h2>
+					</div>
+					<div class="slide-content">
+                        <p>
+                            Provided \(A_i \cap A_j = \emptyset, i \neq j\) and \(\mathbb{P}(A_n)>0,n \geq 1\),
+                            this property holds:
+                        </p>
+
+                        \[
+                            \mathbb{P} \left( B \cap \cup_{n=1}^{\infty}{A_n} \right) =
+                            \sum_{n=1}^{\infty}{\mathbb{P}(B \cap A_n)} =
+                            \sum_{n=1}^{\infty}{\mathbb{P}(B \mid A_n)\mathbb{P}(A_n)}
+                        \]
+						
+                        <p>
+                            or:
+                        </p>
+
+                        \[
+                            \sum_{n=1}^{\infty}{\mathbb{P}(B \cap A_n)} =
+                            \sum_{n=1}^{\infty}{\mathbb{P}(A_n \mid B)\mathbb{P}(B)}
+                        \]
+
+				    </div>
+				</section>
+
+                
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Independence:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Two events \(A\) and \(B\) are said to be independent if:
+                        </p>
+
+                        \[
+                            \mathbb{P}(A \mid B) = \mathbb{P}(A)
+                        \]
+                        
+                        <p>i.e.</p>
+
+                        \[
+                            \mathbb{P}(A \cap B) = \mathbb{P}(A)\mathbb{P}(B)
+                            \to
+                            \mathbb{P}(A \mid B) = \frac{\mathbb{P}(A)\mathbb{P}(B)}{\mathbb(B)} = \mathbb{P}(A)
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Random Variables:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            A real-valued random variable is a mapping
+                            \(X : \Omega \to \mathbb{R}, \omega \mapsto X(\omega)\)
+                            from a probability space \(\Omega\) into the state space \(\mathbb{R}\).
+                        </p>
+
+                        <p>
+                            Given \(X\) and \(A\), we denote the event:
+                        </p>
+
+                        \[
+                            \{X \in A\} = \{\omega \in \Omega: X(\omega) \in A\}
+                        \]
+
+                        <p>
+                            We can also say that \(X\) depends only on the information contained in
+                            \(\mathcal{G}\) \((\mathcal{G}-measurable)\) if:
+                        </p>
+
+                        \[
+                            \{X \leq x\} = \{\omega \in \Omega : X(\omega) \leq x\} \in \mathcal{G},
+                            \quad
+                            \forall x \in \mathbb{R}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Indicator Function:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The indicator function \(\mathbf{1}_A\) of an event \(A\)
+                            is the random variable \(\mathbf{1}_A : \Omega \to \{0,1\}, \omega \mapsto \mathbf{1}_A(\omega)\),
+                            defined by:
+                        </p>
+
+                        \[
+                            \mathbf{1}_A(\omega) =
+                            \begin{cases}
+                                1 \quad \text{if } \omega \in A,\\
+                                0 \quad \text{if } \omega \not\in A.
+                            \end{cases}
+                        \]
+
+                        <p>
+                            With the properties:
+                        </p>
+
+                        <ul>
+                            <li>\(\mathbf{1}_{A \cap B}(\omega) = \mathbf{1}_A(\omega)\mathbf{1}_B(\omega)\);</li>
+                            <li>\(\mathbf{1}_{A \cup B} = \mathbf{1}_A + \mathbf{1}_B - \mathbf{1}_{A \cap B}\)</li>
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Indicator Function:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            In addition any Bernoulli random variable \(X : \Omega \to \{0,1\}\)
+                            can be written as an indicator function \(X = \mathbf{1}_A\) on \(\Omega\) with:
+                        </p>
+
+                        \[
+                            A = \{X = 1\} = \{\omega \in \Omega : X(\omega) = 1\}
+                        \]
+
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Probability Distributions:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The probability distribution of a random variable \(X : \Omega \to \mathbb{R}\)
+                            is the collection \(\{\mathbb{P}(X \in A): A \text{ measurable subset of } \mathbb{R}\}\).
+                        </p>
+
+                        <p>
+                            We can reduce the distributions of \(X\) to the knowledge of either:
+                        </p>
+
+                        <ul>
+                            <li>\(\{\mathbb{P}(a \leq X \leq b) : a < b \in \mathbb{R}\}\)</li>
+                            <li>\(\{\mathbb{P}(X \leq a) : a \in \mathbb{R}\}\)</li>
+                            <li>\(\{\mathbb{P}(X \geq a) : a \in \mathbb{R}\}\)</li>
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Distribution Admitting a Density \((\mathbb{P})\):</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            If the distribution admits a density, we have:
+                        </p>
+
+                        \[
+                            \mathbb{P}(a \leq X \leq b) = \int_{a}^{b}{f(x)dx}
+                        \]
+
+                        <p>
+                            where the function \(f : \mathbb{R} \to \mathbb{R}^+\)
+                            is called the density of the distribution of \(X\).
+                        </p>
+
+				    </div>
+				</section>
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Distribution Admitting a Density \((\mathbb{P})\):</h2>
+					</div>
+					<div class="slide-content">
+                        <p>
+                            The density \(f_X\) can be recovered from the distribution functions:
+                        </p>
+
+                        \[
+                            x \mapsto \mathbb{P}(X \leq x) = \int_{-\infty}^{x}{f_X(s)ds}, \quad x \in \mathbb{R}
+                        \]
+
+                        \[
+                            x \mapsto \mathbb{P}(X \geq x) = \int_{x}^{\infty}{f_X(s)ds}, \quad x \in \mathbb{R}
+                        \]
+
+                        \[
+                            f_X(x) = \frac{\partial }{\partial x}\int_{-\infty}^{x}{f_X(s)ds} = -\frac{\partial}{\partial x}\int_{x}^{\infty}{f_X(s)ds}, \quad x \in \mathbb{R}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Distribution Admitting a Density \(\mathbb{P}\):</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Given a joint probability density function \(f_{(X_1,X_2)}(x,y)\),
+                            the probability that the first variable is less than or equal to the second
+                            is calculated by:
+                        </p>
+
+                        \[
+                            \mathbb{P}(X_1 \leq X_2) = \int_{-\infty}^{\infty}\int_{-\infty}^{y}{f_{(X_1,X_2)}(x,y)dxdy}
+                        \]
+
+                        <p>
+                            If the distribution of a pair of random variables admits a density, then the probability that
+                            they assume exactly the same value is zero:
+                        </p>
+
+                        \[
+                            \mathbb{P}(X_1 = X_2) = \int \int_{(X,Y) \in \mathbb{R}^2 : x=y} f_{(X_1,X_2)}(x,y)dxdy = 0
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Distribution types:</h2>
+					</div>
+					<div class="slide-content">
+                        <p>&nbsp;</p>
+						<ul>
+                            <li>Uniform distribution:</li>
+
+                            \[
+                                f(x) = \frac{1}{b-a}\mathbf{1}_{[a,b]}(x), \quad x \in \mathbb{R}
+                            \]
+
+                            <li>Gaussian distribution:</li>
+
+                            \[
+                                f(x) = \frac{1}{\sqrt{2\pi}}e^{-x^2/2}, \quad x \in \mathbb{R}
+                            \]
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Distribution types:</h2>
+					</div>
+					<div class="slide-content">
+                        <p>&nbsp;</p>
+						<ul>
+                            <li>Exponential distribution:</li>
+
+                            \[
+                                f(x) = \lambda \mathbf{1}_{[0,\infty)}(x)e^{-\lambda x}
+                            \]
+
+                            <p>and:</p>
+
+                            \[
+                                \quad \mathbb{P}(X > t) = e^{-\lambda t}, \quad t \in \mathbb{R}^+
+                            \]
+
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Distribution types:</h2>
+					</div>
+					<div class="slide-content">
+                        <p>&nbsp;</p>
+						<ul>
+                            <li>Gamma distribution:</li>
+
+                            \[
+                                \quad f(x) = \frac{a^\lambda}{\Gamma(\lambda)}\mathbf{1}_{[0,\infty)}(x)x^{\lambda - 1}e^{-ax}
+                            \]
+
+                            <p>where \(a > 0, \lambda > 0\) and:</p>
+
+                            \[
+                                \Gamma(\lambda) = \int_{0}^{\infty}{x^{\lambda - 1}e^{-x}dx}
+                            \]
+
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Distribution types:</h2>
+					</div>
+					<div class="slide-content">
+						<p>&nbsp;</p>
+						<ul>
+                            <li>Cauchy distribution:</li>
+
+                            \[
+                                f(x) = \frac{1}{\pi(1+x^2)} \quad x \in \mathbb{R}
+                            \]
+
+                            <li>lognormal distribution:</li>
+
+                            \[
+                                f(x) = \mathbf{1}_{[0,\infty)}(x)\frac{1}{x\sigma\sqrt{2\pi}}e^{\frac{(\mu - \log x)^2}{2\sigma^2}}
+                            \]
+
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Discrete distributions:</h2>
+					</div>
+					<div class="slide-content">
+						<p>&nbsp;</p>
+						<ul>
+                            <li>Bernoulli distribution:</li>
+
+                            \[
+                                \mathbb{P}(X=1) = p \text{ and } \mathbb{P}(X = 0) = 1-p
+                            \]
+
+                            <p>where \(p \in [0,1]\) are parameters.</p>
+
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Discrete distributions:</h2>
+					</div>
+					<div class="slide-content">
+						<p>&nbsp;</p>
+						<ul>
+                            <li>Binomial distribution:</li>
+
+                            \[
+                                \mathbb{P}(X = k) = 
+                                \begin{pmatrix}
+                                    n\\k
+                                \end{pmatrix}
+                                p^k(1-p)^{n-k}, \quad k = 0,1,\ldots, n
+                            \]
+
+                            <p>where \(n \geq 1\) and \(p \in [0,1]\) are parameters.</p>
+
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Discrete distributions:</h2>
+					</div>
+					<div class="slide-content">
+						<p>&nbsp;</p>
+						<ul>
+                            <li>Geometric distribution:</li>
+
+                            \[
+                                \mathbb{P}(X = k) = (1-p)p^k, \quad k \in \mathbb{N}
+                            \]
+
+                            <p>where \(p \in (0,1)\) is a parameter.</p>
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Discrete distributions:</h2>
+					</div>
+					<div class="slide-content">
+						<p>&nbsp;</p>
+						<ul>
+                            <li>Pascal distribution (negative binomial distribution):</li>
+
+                            \[
+                                \mathbb{P}(X = k) =
+                                \begin{pmatrix}
+                                    k + r -1\\
+                                    r - 1 
+                                \end{pmatrix}
+                                (1-p)^r p^k
+                            \]
+
+                            <p>where \(p \in (0,1)\) and \(r \geq 1\) are parameters.</p>
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Discrete distributions:</h2>
+					</div>
+					<div class="slide-content">
+						<p>&nbsp;</p>
+						<ul>
+                            <li>Poisson distribution:</li>
+
+                            \[
+                                \mathbb{P}(X = k) = \frac{\lambda^k}{k!}e^{-\lambda}, \quad k \in \mathbb{N}
+                            \]
+
+                            <p>where \(\lambda > 0\) is a parameter.</p>
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Expectation:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The expectation of a random variable \(X\) is the mean, or
+                            average value of \(X\). In general the expectation of the indicator function
+                            \(\mathbf{1}_A\), is defined as \(\mathbb{E}[\mathbf{1]_a}] = \mathbb{P}(A)\)
+                            for any event \(A\).
+                        </p>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Expectation:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Let \(X : \Omega \to \mathbb{N}\) be a discrete random variable.
+                            The expectation \(\mathbb{E}(X)\) of \(X\) is defined as:
+                        </p>
+
+                        \[
+                            \mathbb{E}[X] = \sum_{k=0}^{\infty}{k\mathbb{P}(X = k)}
+                        \]
+
+                        <p>
+                            in which the possible values \(k \in \mathbb{N}\) of \(X\)
+                            are weighted by their probabilities.
+                        </p>
+
+                        <p>
+                            *Note that the expectation is a linear operation:
+                        </p>
+
+                        \[
+                            \mathbb{E}[aX + bY] = a\mathbb{E}[X] + b\mathbb{E}[Y]
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Conditional Expectation:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The conditional expectation of \(X : \Omega \to \mathbb{N}\)
+                            given an event \(A\) is defined by:
+                        </p>
+
+                        \[
+                            \mathbb{E}[X \mid A] = \sum_{k=0}^{\infty}{k \mathbb{P}(X = k \mid A)}
+                        \]
+
+                        <p>whenever the above series converges.</p>
+
+                        <p><b>Lemma:</b> Given an event \(A\) such that \(\mathbb{P}(A) > 0\), we have:</p>
+
+                        \[
+                            \mathbb{E}[X \mid A] = \frac{1}{\mathbb{P}(A)}\mathbb{E}[X\mathbf{1}_A]
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Random Sums and Products:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The expectation of a random sum \(\sum_{k=1}^{Y}{X_k}\), where \((X_k)_{k \in \mathbb{N}}\)
+                            is a sequence of random variables, that can be computed as:
+                        </p>
+
+                        \[
+                            \mathbb{E}\left[\sum_{k=1}^{Y}{X_k}\right] = \mathbb{E}\left[\mathbb{E}\left[\sum_{k=1}^{Y}{X_k \mid Y}\right]\right]
+                        \]
+
+                        <p>*The same is valid for a random product, mutatis mutandis.</p>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Random Sums and Products:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The expectation of a random sum \(\sum_{k=1}^{Y}{X_k}\), where \((X_k)_{k \in \mathbb{N}}\)
+                            is a sequence of random variables, that can be computed as:
+                        </p>
+
+                        \[
+                            \mathbb{E}\left[\sum_{k=1}^{Y}{X_k}\right] = \sum_{n=0}^{\infty}{\mathbb{E}\left[\sum_{k=1}^{Y}{X_k \mid Y = n}\right]}\mathbb{P}(Y = n)
+                        \]
+
+                        <p>*The same is valid for a random product, mutatis mutandis.</p>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Random Sums and Products:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The expectation of a random sum \(\sum_{k=1}^{Y}{X_k}\), where \((X_k)_{k \in \mathbb{N}}\)
+                            is a sequence of random variables, that can be computed as:
+                        </p>
+
+                        \[
+                            \mathbb{E}\left[\sum_{k=1}^{Y}{X_k}\right] = \sum_{n=0}^{\infty}{\mathbb{E}\left[\sum_{k=1}^{n}{X_k \mid Y = n}\right]}\mathbb{P}(Y = n)
+                        \]
+
+                        <p>*The same is valid for a random product, mutatis mutandis.</p>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Distribution Admitting a Density \(\mathbb{E}\)</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Given a random variable \(X\) whose distribution admits a density
+                            \(f_X : \mathbb{R} \to \mathbb{R}^+\), we have for all sufficiently integrable function
+                            \(\phi \in \mathbb{R}\):
+                        </p>
+
+                        \[
+                            \mathbb{E}[\phi(X)] = \int_{-\infty}^{\infty}{\phi(x)f_X(x)dx}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Distribution Admitting a Density \(\mathbb{E}\)</h2>
+					</div>
+					<div class="slide-content">
+						<p>And for a couple of random variables \(X_1,X_2\) that admits a density
+                            \(f_{X_1,X_2} : \mathbb{R} \to \mathbb{R}^+\), we have:
+                        </p>
+
+                        \[
+                            \mathbb{E}[\phi(X,Y)] = \int_{-\infty}^{\infty}\int_{-\infty}^{\infty}{\phi(x,y)f_{X_1,X_2}(x,y)dxdy}
+                        \]
+
+                        <p>
+                            The expectation of an absolutely continuous random variable satisfies
+                            the same linearity property as in the discrete case.
+                        </p>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Conditional Expectation:</h2>
+					</div>
+					<div class="slide-content">
+						<p>Denote the conditional expectation of \(F\) given \(\mathcal{G}\)
+                            by \(\mathbb{E}[F \mid \mathcal{G}]\), for all bounded and \(\mathcal{G}\)-measurable
+                            random variables \(G\), we have the relation:
+                        </p>
+
+                        \[
+                            \mathbb{E}[GF] = \mathbb{E}[G \mathbb{E}[F \mid \mathcal{G}]]
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Conditional Expectation:</h2>
+					</div>
+					<div class="slide-content">
+						<p>And the following properties:</p>
+                        <ul>
+                            <li>If \(G\) depends only on the information contained in \(\mathcal{G}\):</li>
+                            \[
+                                \mathbb{E}[FG \mid \mathcal{G}] = G \mathbb{E}[F \mid \mathcal{G}]
+                            \]
+                            <li>When \(G\) depends only on the information contained in \(\mathcal{G}\):</li>
+                            \[
+                                \mathbb{E}[G \mid \mathcal{G}] = G
+                            \]
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Conditional Expectation:</h2>
+					</div>
+					<div class="slide-content">
+                        <ul>
+                            <li><b>Tower property</b>: If \(\mathcal{H} \subset \mathcal{G}\):</li>
+                            
+                            \[
+                                \mathbb{E}[\mathbb{E}[F \mid \mathcal{G}] \mid \mathcal{H}] = \mathbb{E}[F \mid \mathcal{H}]
+                            \]
+
+                            <li>When \(F\) is independent of the \(\sigma\)-algebra \(\mathcal{G}\):</li>
+
+                            \[
+                                \mathbb{E}[F \mid \mathcal{G}] = \mathbb{E}[F]
+                            \]
+
+                            <li>If \(G\) depends only on \(\mathcal{G}\) and \(F\) is independent of \(\mathcal{G}\):</li>
+
+                            \[
+                                \mathbb{E}[h(F,G) \mid \mathcal{G}] = \mathbb{E}[h(x,F)]_{x = G}
+                            \]
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Characteristic Function:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The characteristic function of a random variable \(X\) is the function
+                            \(\Psi_X : \mathbb{R} \to \mathbb{C}\) defined by:
+                        </p>
+
+                        \[
+                            \Psi_X(t) = \mathbb{E}[e^{itX}], \quad t \in \mathbb{R}
+                        \]
+
+                        <p>
+                            The characteristic function of a random variable \(X\) that admits a density
+                            \(f : \mathbb{R} \to \mathbb{R}^+\) satisfies:
+                        </p>
+
+                        \[
+                            \Psi_X(t) = \int_{-\infty}^{\infty}{e^{itx}f(x)dx}, \quad t \in \mathbb{R}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Characteristic Function:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Or for a discrete random variable \(X : \Omega \to \mathbb{N}\):
+                        </p>
+
+                        \[
+                            Psi_X(t) = \sum_{n=0}^{\infty}{e^{itn}\mathbb{P}(X = n)}, \quad t \in \mathbb{R}
+                        \]
+
+                        <p>
+                            The characteristic function of a random vector \((X,Y)\) is the
+                            function \(\Psi_{X,Y} : \mathbb{R}^2 \to \mathbb{C}\), defined by:
+                        </p>
+
+                        \[
+                            \Psi_{X,Y}(s,t) = \mathbb{E}[e^{isX + itY}], \quad s,t \in \mathbb{R}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Characteristic Function:</h2>
+					</div>
+					<div class="slide-content">
+						<p>The main aplications of characteristic functions lie in the following theorems:</p>
+
+                        <ul>
+                            <li>Two random variables \(X,Y : \Omega \to \mathbb{R}\) have the same distribution iff:</li>
+
+                            \[
+                                \Psi_X(t) = \Psi_Y(t), \quad t \in \mathbb{R}
+                            \]
+
+                            <li>Two random variables \(X,Y : \Omega \to \mathbb{R}\) are independent iff:</li>
+
+                            \[
+                                \Psi_{X,Y}(s,t) = \Psi_X(s)\Psi_Y(t), \quad s,t \in \mathbb{R}
+                            \]
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Gaussian Proposition:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            An important proposition is that, if \(X \simeq \mathcal{N}(\mu, \sigma_X^2)\)
+                            and \(Y \simeq \mathcal{N}(v,\sigma_Y^2)\) are independent Gaussian variables.
+                            Then \(X + Y\) also have a Gaussian distribution:
+                        </p>
+
+                        \[
+                            X + Y \simeq \mathcal{N}(\mu + v, \sigma_X^2 + \sigma_Y^2)
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Moment Generating functions:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The moment generating function of a random variable \(X\)
+                            is the function \(\phi_X : \mathbb{R} \to \mathbb{R}\) defined by:
+                        </p>
+
+                        \[
+                            \phi_X(t) = \mathbb{E}[e^{tX}], \quad t \in \mathbb{R}
+                        \]
+
+                        <p>
+                            In particular we have (provided \(\mathbb{E}[|X|^n] < \infty\)):
+                        </p>
+
+                        \[
+                            \mathbb{E}[X^n] = \frac{\partial^n}{\partial t}\phi_X(0), \quad n \geq 1
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Moment Generating functions:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The moment generating function of a random variable that admits a density
+                            \(f : \mathbb{R} \to \mathbb{R}^+\) satisfies:
+                        </p>
+
+                        \[
+                            \phi_X(t) = \int_{-\infty}^{\infty}{e^{tx}f(x)dx}, \quad t \in \mathbb{R}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Probability Generating functions:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The probability generating function of \(X\) is the function
+                            \(G_X : [-1,1] \to \mathbb{R}, s \mapsto G_X(s)\), defined by:
+                        </p>
+
+                        \[
+                            G_X(s) := \sum_{n=0}^{\infty}{s^n\mathbb{P}(X = n)} = \mathbb{E}[s^X\mathbf{1}_{X < \infty}], \quad -1 \leq s \leq 1
+                        \]
+                        <p>
+                            When \(X\) and \(Y\) are two independent variables we have:
+                        </p>
+
+                        \[
+                            G_{X+Y}(s) = \mathbb{E}[s^{X+Y}] = \mathbb{E}[s^X s^Y]
+                        \]
+
+                        \[
+                            G_{X+Y}(s) = \mathbb{E}[s^X]\mathbb{E}[s^Y] = G_X(s)G_Y(s), \quad -1 \leq s \leq 1
+                        \]
+
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Cumulants and Moments:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The cumulants of a random variable \(X\) are the sequence \((\kappa_n^X)_{n \in \mathbb{N}}\)
+                            of numbers defined by the logarithmic generating function:
+                        </p>
+
+                        \[
+                            \log \left( \mathbb{E}[e^{tX}]\right) = \sum_{n=1}^{\infty}{\kappa_n^X \frac{t^n}{n!}}, \quad t \in \mathbb{R}
+                        \]
+
+                        <p>
+                            The n=th moment of a random variable \(X\) can be written in terms of its cumulants as:
+                        </p>
+
+                        \[
+                            \mathbb{X^n} = \sum_{k=0}^{n}{\frac{1}{k!}} \sum_{d_1 + \ldots + d_k = n}{\frac{n!}{d_1! \ldots d_k!} \kappa_{d_1}^X \ldots \kappa_{d_k}^X}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Cumulants and Moments:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            <b>Faà di Bruno formula:</b> Let \(B_1, \ldots, B_a\) be partitions of
+                            \(\{1,\ldots, n\}\) with cardinal \(|B_i|\):
+                        </p>
+
+                        \[
+                            \mathbb{E}[X^n] = \sum_{k=1}^{n} \sum_{B_1,\ldots, B_k}{\kappa_{|B_1|}^x \ldots \kappa_{B_k}^X}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Cumulants and Moments:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            This also show that:
+                        </p>
+
+                        \[
+                            \mathbb{E}[X^n] = A_n(\kappa_1^X,\kappa_2^X,\ldots,\kappa_n^X)
+                        \]
+
+                        <p>
+                            where \(A_n(X_1,\ldots,X_n)\) is the Bell polynomial of degree \(n\) given by:
+                        </p>
+
+                        \[
+                            A_n(X_1,\ldots,X_n) = n! \sum_{r_1 + 2r_2 + \ldots nr_n = n} \prod_{l = 1}^{n}{\left(\frac{1}{r_l!}\left(\frac{X_l}{l!}\right)^{r_l}\right)}
+                        \]
+                        <p>
+                            subject to \(r_1, \ldots, r_n \geq 0\).
+                        </p>
+				    </div>
+				</section>
+            </div>
+        </div>
+
+        <script src="../../dist/reveal.js"></script>
+		<script src="../../plugin/notes/notes.js"></script>
+		<script src="../../plugin/markdown/markdown.js"></script>
+		<script src="../../plugin/highlight/highlight.js"></script>
+		<script src="../../plugin/math/math.js"></script>
+		<script src="../../init.js"></script>
+
+    </body>
+</html>
