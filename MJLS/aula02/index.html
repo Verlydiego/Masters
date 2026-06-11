@@ -1,0 +1,870 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	
+        <title>MJLS - Class 1</title>
+
+        <link rel="stylesheet" href="../../dist/reset.css">
+        <link rel="stylesheet" href="../../dist/reveal.css">
+        <link rel="stylesheet" href="../../dist/theme/white.css" id="theme">
+
+        <!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="../../plugin/highlight/monokai.css" id="highlight-theme">
+		<link rel="stylesheet" href="../../style.css">
+	</head>
+
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+				<!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="title">
+					<h1>Discrete-Time Markov Jump Systems</h1>
+					</div>
+	    			<p>Class 1: Background Material - Notations, norms and spaces</p>
+					<div class="author">
+	    			<h3>Diego Verly</h3>
+					</div>
+						<div>
+	    				<p style="text-align: center;font-size: 0.8em;">May 2026</p>
+					</div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+                        <h2>Objectives:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>&nbsp;</p>
+                        <p>The objectives of this class are:</p>
+                        <ul>
+                            <li>Overview of Mathematical Spaces;</li>
+                            <li>Completeness and Convergence;</li>
+                            <li>Linear Operator Theory;</li>
+                            <li>Boundedness and Norms;</li>
+                            <li>Analytical Foundation for MJLS.</li>
+                        </ul>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Bibliography</h2>
+					</div>
+					<div class="slide-content">
+						<p>&nbsp;</p>
+						<u1>
+							<li><b>[1]COSTA, O. L. V.; Fragoso, M. D.; Marques, R. P.; Discrete-Time Markov Jump Linear Systems. Springer, 2005.</b></li>
+                            <li><b>[2]WEIDMANN, J.; Linear Operators in Hilbert Spaces. Springer, 1980.</b></li>
+                            <li><b>[3]BREWER, J.W.; Kronecker products and matrix calculus in system theory. IEEE Transactions on Circuits and Systems, 1978.</b></li>
+                            <li><b>[4]NAYLOR, A.W.; SELL, G.R.; Linear Operator Theory in Engineering and Science. Springer-Verlag, second edition, 1982</b></li>
+						</u1>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Sesquilinear Forms:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>Consider a filed \(\mathbb{K}\) either the field \(\mathbb{C}\) of complex numbers
+                            or the field \(\mathbb{R}\) of real numbers. Let \(H\) be a vector space over \(\mathbb{K}\).
+                        </p>
+
+                        <ul>
+                            <li>Sesquilinear form (A mapping \(s : H \times H \to \mathbb{K}\))</li>
+                            \[
+                            s(f,ag+bh) = as(f,g) + bs(f,h)
+                            \]
+                            \[
+                            s(af+bg,h) = a^*s(f,h) + b^*s(g,h)
+                            \]
+                            <p>
+                                \(\forall f,g,h \in H\) and \(\forall a,b \in \mathbb{K}\). 
+                                Where \(a^*\) and \(b^*\) denote the complex conjugate of \(a\) and \(b\), respectively.
+                            </p>
+                        </ul>
+
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Bilinear Form:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>A bilinear form on \(H\) is given by:</p>
+
+                        \[
+                            s(f,ag + bh) = as(f,g) + bs(f,h)
+                        \]
+
+                        \[
+                            s(af + bg,h) = as(f,h) + bs(g,h)
+                        \]
+
+                        <p>*In particular, every sesquilinear form on a real vector space
+                            is a bilinear form.</p>
+                        </p>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Scalar Product:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>A positive sesquilinear form on \(H\) is called a scalar product on \(H\).
+                            it will be denoted by \(\langle \cdot, \cdot \rangle\).
+                            The mapping \(s : H \times H \to \mathbb{R}\) is a scalar product if, and only if
+                            \(\forall f,g,h \in H\) and \(a \in \mathbb{K}\):
+                        </p>
+
+                        <ul style="font-size: 0.95em;">
+                            <li>\(s(f,g,h) = s(f,g) + s(f,h)\);</li>
+                            <li>\(s(f,ag) = as(f,g)\)</li>
+                            <li>\(s(f,g) = s(g,f)^*\)</li>
+                            <li>\(s(f,f) \geq 0\)</li>
+                            <li>\(s(f,f) > 0\) if \(f \neq 0\)</li>
+                        </ul>
+
+                        <p>*A semi-scalar product is a nonegative sesquilinear form.</p>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Norm:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>A mapping \(p : H \to \mathbb{R}\) is called a norm
+                            (denoted by \(||\cdot||\)) on \(H\) if, and only if, 
+                            \(\forall f,g \in H\) and \(\forall a \in \mathbb{K}\):
+                        </p>
+
+                        <ul>
+                            <li>\(p(f) \geq 0\);</li>
+                            <li>\(p(af) = |a|p(f)\);</li>
+                            <li>\(p(f + g) \leq p(f) + p(g)\) (triangle inequality);</li>
+                            <li>\(p(f) > 0\) provided \(f \neq 0\)</li>
+                        </ul>
+
+                        <p>*The mapping will be called a seminorm on \(H\) if it satisfies (i-iii).</p>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Pre-Hilbert and Norm Spaces:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>If \(H\) is a vector space \(\langle \cdot, \cdot \rangle\)
+                            is a scalar product on \(H\), then we call the pair \(H, \langle \cdot, \cdot, \rangle\)
+                            a pre-Hilbert space.
+                        </p>
+
+                        <p>
+                            If \(||\cdot||\) is a norm on \(H\), then we call the pair
+                            \(H, ||\cdot||\) a normed space.
+                        </p>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Cauchy sequence:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>A sequence \((f_n)\) in a normed space \(H\) is called a Cauchy sequence if,
+                             for every \(\varepsilon > 0\), there exists an \(n_0 \in \mathbb{N}\) such that
+                             \(||f_n - f_m|| \leq \varepsilon\). With:
+                        </p>
+
+                        <ul>
+                            <li>if \((f_n)\) is a Cauchy sequence, then the sequence
+                                \(||f_n||\) is convergent (thus it is bounded);
+                            </li>
+                            <li>if \(H,\langle \dot , \cdot \rangle\) is a pre-Hilbert space
+                                and \((f_n), (g,n)\) are Cauchy sequences, then the sequence
+                                \(\langle f_n, g_n \rangle\) is convergent.
+                            </li>
+                        </ul>
+
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Banach and Hilbert Spaces:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            A complete normed space is called a Banach space \((\mathbb{B})\).
+                        </p>
+
+                        <p>
+                            A complete pre-Hilbert space is called a Hilbert space \((\mathbb{H})\).
+                        </p>
+
+                        <p>
+                            A normed space \((H,||\cdot||)\) is said to be complete if every Cauchy sequence
+                            is convergent.
+                        </p>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Banach and Hilbert Spaces:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            For \(\mathbb{X}\) and \(\mathbb{Y}\) complex Banach spaces, set \(\mathbb{B}(\mathbb{X},\mathbb{Y})\)
+                            the Banach space of all bounded linear operators of \(\mathbb{X}\) and \(\mathbb{Y}\).
+                            And for simplicity \(\mathbb{B}(\mathbb{X}) \triangleq \mathbb{B}(\mathbb{X},\mathbb{X})\).
+                        </p>
+
+                        <p>
+                            Two norms \(||\cdot||\) in a Banach space \(\mathbb{X}\) are equivalent if for 
+                            some \(c_1 > 0\), \(c_2 > 0\) and \(\forall x \in \mathbb{X}\):
+                        </p>
+
+                        \[
+                            ||x||_1 \leq c_2||x||_2 \quad,  ||x||_2 \leq c_1||x||_1
+                        \]
+                    </div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Linear Operators:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            A linear operator \(T\) from \(H_1\) into \(H_2\) is, by definition,
+                            a linear mapping of a subsbace \(D(T)\) of \(H_1\) into \(H_2\).
+                            Where the subspace \(D(T)\) is called the domain of \(T\).
+                        </p>
+
+                        <p>
+                            The image \(R(T) - T(D(T)) = \{T_f : f \in D(T)\}\) is called
+                            the range of \(T\).
+                        </p>
+
+                        <p>
+                            If \(H_1 = H_2 = H\), the \(T\) is called an operator on \(H\)
+                            and a linear operator from \(H into \mathbb{K}\) is called a linear functional.
+                        </p>
+
+                        <p>
+                            An operator is injective iff \(T_f = 0\) implies \(f = 0\).
+                        </p>
+
+                        <p>
+                            An operator is said to be bijective if \(T\) is injective and \(R(T) = H_2\).
+                        </p>
+
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Bounded Operators:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            An operator \(T\) from \(H_1\) into \(H_2\) is said to be bounded
+                            if there exists a \(C \geq 0\) such that \(||T_f|| \leq C||f||\)
+                            \(\forall f \in D(T)\). Any such \(C\) is called a bound of \(T\).
+                        </p>
+
+                        <p>
+                            Let's call the set of the bounded operators from \(H_1\) into \(H_2\)
+                            as \(B(H_1,H_2)\). Then \(B(H) \triangleq B(H,H)\).
+                        </p>
+
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Open and Closed subsets:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            Let \(H\) be a normed space. A subset \(A\) of \(H\) is said to be open
+                            if for each \(f \in A\) there exists a \(\varepsilon > 0\) such that:
+                        </p>
+
+                        \[
+                            K(f,\varepsilon) = \{g \in H : ||g - f|| < \varepsilon\}
+                        \]
+                        
+                        <p>
+                            lies in \(A\). 
+                        </p>
+
+                        <p>
+                            A subset \(A\) of \(H\) is said to be closed if \(CA = H / A\),
+                            the complement of \(A\) is open.
+                        </p>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Closed and Closable Operators:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            Let \(T\) be an operator from \(H_1\) into \(H_2\). 
+                            The graph of \(T\) is the subset of \(H_1 \times H_2\),
+                            where \(H_1 \times H_2\) can be considered a Hilbert space
+                            \((H_1 \times H_2 = H_1 \oplus H_2)\):
+                        </p>
+
+                        \[
+                            G(T) = \{(f, T_f) : f \in D(T)\}
+                        \]
+
+                        <p>
+                            An operator is said to be closed if its graph \(G(T) \in H_1 \times H_2\)
+                            is closed.
+                        </p>
+
+                        <p>
+                            An operator is said to be closable if \(G(T)\) is a graph.
+                        </p>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Resolvent Set:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            Let \(H\) be a Hilbert space over \(\mathbb{K}\) and let
+                            \(T\) be an operator on \(H\). The number \(z \in \mathbb{K}\) 
+                            is called an eigenvalue of \(T\) if there exists an \(f \in D(T)\), \(f \neq 0\) 
+                            such that \(T_f = zf\).
+                        </p>
+
+                        <p>
+                            The element \(f\) is called an eigenelement or eigenvector of \(T\) belonging
+                            to the eigenvalue \(z\). If \(z\) is not an eigenvalue, then the operator
+                            \(R(z,T) = (zI - T)^{-1}\) is called the resolvent of \(T\) at the point \(z\)
+                            and it's well defined.
+                        </p>
+
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Resolvent Set:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            Then the resolvent set of \(T\) is given by:
+                        </p>
+
+                        \[
+                            p(T) = \{z \in \mathbb{K} : z - T \text{ is injective, and } R(z,T) \in B(H)\}
+                        \]
+
+                        <p>
+                            And for a closed operator \(T\) on \(H\), we have:
+                        </p>
+
+                        \[
+                            p(T) = \{z \in \mathbb{K} : z - T \text{ is bijective.}\}
+                        \]
+                    </div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Spectrum:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            The spectrum of \(T\) is given by:
+                        </p>
+
+                        \[
+                            \sigma(T) = \mathbb{K} / p(T) = C_k p(T)
+                        \]
+
+                        <p>
+                            Where the set \(\sigma_p(T)\) of all the eigenvalues of \(T\)
+                            is contained in \(\sigma(T)\). The set \(\sigma_p(T)\) is called
+                            the point-spectrum of \(T\).
+                        </p>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Von Neumann Series:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            If \(T\) is a closed operator on the Hilbert space \(H\),
+                            then \(p(T)\) is open, consequently \(\sigma(T)\) is closed.
+                            More precisely, if \(z_0 \in p(T)\), then \(z \in p(T) \quad \forall z \in \mathbb{K}\)
+                            such that \(|z-z_0| < ||R(z_0,T)||^{-1}\), and for these \(z\) we have:
+                        </p>
+
+                        \[
+                            R(z,T) = \sum_{n=0}^{\infty}{(z_0 - z)^n R(z_0,T)^{n-1}}
+                        \]
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Von Neumann Series:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            If \(T \in B(H)\), then we have \(\{z \in \mathbb{K} : |z| > ||T||\} \subset p(T)\);
+                            the spectrum \(\sigma(T)\) is compact. Furthermore:
+                        </p>
+
+                        \[
+                            R(z,T) = \sum_{n=0}^{\infty}{z^{-n-1} T^n}
+                        \]
+
+                        <p>
+                            This series is called the von Neumann series.
+                        </p>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Spectral Radius:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            Assume that \(H\) is a Hilbert space and \(T \in B(H)\),
+                            the spectral radius of \(T\) is \(r(T) = \lim \sup ||T^n||^{1/n}\).
+                            Then, we have:
+                        </p>
+
+                        <ul style="font-size: 0.95em;">
+                            <li>\(r(T) \leq ||T^m||^{1/m} \quad \forall m \in \mathbb{N}\) and thus
+                                \(r(T) = \lim ||T^n||^{1/n}\);
+                            </li>
+                            <li>\(r(T) \leq ||T||\) and \(\sigma(T) \subset \{z \in \mathbb{K} : |z| \leq r(T)\} \quad \forall z \in \mathbb{K}\)
+                                such that \(|z| > r(T)\), the operator \(R(z,T)\) is given by the Neumann series.
+                            </li>
+                            <li>If \(H\) is complex, then \(\sigma(T)\) is non-empty and there exists a \(z \in \sigma(T)\)
+                                such that \(|z| = r(T)\), i.e., we have \(r(T) = \{|z|:z \in \sigma(T)\}\).
+                            </li>
+                            <li>The previous statement also holds for any self-adjoint \(T\) in a real Hilbert space.</li>
+
+                        </ul>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Trace Operator:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            Denote by \(\lambda_i(P), i=1,\ldots,N\) the eigenvalues of a matrix \(P \in \mathbb{B}(\mathbb{C})^n\).
+                        </p>
+
+                        <p>Recall that the trace operator \(tr(\cdot) : \mathbb{B}(\mathbb{C}^n) \to \mathbb{C}\)
+                            is a linear functional with the following properties:
+                        </p>
+
+                        <ul>
+                            <li>\(\tr(KL) = \tr(LK)\);</li>
+                            <li>For any \(M, P \in \mathbb{B}(\mathbb{C}^n)\)
+                                with \(M \geq 0\), \(P > 0\):
+                            </li>
+                        </ul>
+
+                        \[
+                        \left(\min_{i=1,\ldots,n} \lambda_i(P)\right)\tr(M) \leq \tr(MP) \leq \left(\max_{i=1,\ldots,n} \lambda_i(P)\right)tr(M)
+                        \]
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Convenient Space:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            A convenient space to be used is the one defined as \(\mathbb{H}^{n,m}\),
+                            which is the linear space made up of all \(N\)-sequences of complex matrix \(V = (V_1,\ldots,V_N)\)
+                            with \(V_i \in \mathbb{B}(\mathbb{C}^n, \mathbb{C}^m), i \in \mathbb{N}\).
+                            For simplicity \(\mathbb{H}^n \triangleq \mathbb{H}^{n,n}\).
+                        </p>
+
+                        <p>
+                            In this finite dimensional space \(\mathbb{H}^{n,m}\), we define the following equivalent norms:
+                        </p>
+
+                        \[
+                            ||V||_1 \triangleq \sum_{i=1}^{N}{||V_i||}, \quad ||V||_2 \triangleq \left(\sum_{i=1}^{N}{\tr(V_i^*V_i)}\right)^{1/2}
+                        \]
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Convenient Space:</h2>
+                    </div>
+
+                    <div class="slide-content">
+
+                    \[
+                        ||V||_{max} \triangleq \max \{||V_i||, \quad i \in \mathbb{N}\}
+                    \]
+
+                    <p>
+                        *We shall omit the subscripts whenever the definition of a specific
+                        norm does not affect the result being considered.
+                    </p>
+
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Convenient Space:</h2>
+                    </div>
+
+                    <div class="slide-content">
+
+                    <p>
+                        It is easy to verify that \(\mathbb{H}^{n,m}\) equipped with any of the
+                        previous norms is a Banach space and, in fact \((||\cdot||_2,\mathbb{H}^{n,m})\)
+                        is a Hilbert space, with the inner product given, for \(V = (V_1,\ldots,V_N)\)
+                        and \(S = (s_1,\ldots,S_N) \in \mathbb{H}^{n,m}\), by:
+                    </p>
+
+                    \[
+                        \langle V,S \rangle \triangleq \sum_{i=1}^{N}{\tr(V_i^*S_i)}    
+                    \]
+
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Convenient Space:</h2>
+                    </div>
+
+                    <div class="slide-content">
+
+                    <p>
+                        It is also convenient to define the equivalent induced norms for
+                        the operator \(T \in \mathbb{B}(\mathbb{H^n})\):
+                    </p>
+
+                    \[
+                        ||T||_1 \triangleq \sup_{V \in \mathbb{H}^n} \frac{||T(V)||_1}{||V||_1},
+                        \quad
+                        ||T||_2 \triangleq \sup_{V \in \mathbb{H}^n} \frac{||T(V)||_2}{||V||_2}   
+                    \]
+
+                    <p>
+                        *We shall omit the subscripts whenever the definition of a specific norm does
+                        not affect the result being considered.
+                    </p>
+
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Hermitian Matrix and operator:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            For \(V = (V_1,\ldots,V_N) \in \mathbb{H}^{n,m}\) we write
+                            \(V^* = (v_1^*,\ldots,V_N^*) \in \mathbb{H}^{m,n}\), and say that
+                            \(V \in \mathbb{H}^n\) is hermitian if \(V = V^*\). Then, set:
+                        </p>
+
+                        \[
+                            H^{n^*} \triangleq \{V \in \mathbb{H}^{n*}; V_i = V_i^*, i \in \mathbb{N}\}
+                        \]
+
+                        \[
+                            H^{n^+} \triangleq \{V \in \mathbb{H}^{n+}; V_i \geq 0, i \in \mathbb{N}\}
+                        \]
+
+                        <p>
+                            You can say that \(V \geq S\) if \(V-S = (V_1 - S_1, \ldots, V_N - S_n) \in \mathbb{H}^{n+}\).
+                            And that an operator \(T \in \mathbb{B}(\mathbb{H}^n)\) is hermitian if \(T(V) \in \mathbb{H}^{n^*}\)
+                            whenever \(V \in \mathbb{K}^{n*}\), and that it is positive if \(T(V) \in \mathbb{H}^{n+}\)
+                            whenever \(V \in \mathbb{H}^{n+}\).
+                        </p>
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Vectorization Mappings:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            Define the operators \(\phi\) and \(\hat{\phi}\) that acts
+                            as mathematical mappings that allow the operator \(T\) to be
+                            represented in a different coordinate system, with \(V = (V_1,\ldots,V_N) \in \mathbb{H}^{n,m}\),
+                            with \(V_i = [v_i1 \quad \ldots \quad v_in] \in \mathbb{B}(\mathbb{C}^n,\mathbb{C}^m), v_{ij} \in \mathbb{C}^m\):
+                        </p>
+
+                        \[
+                            \phi(V_i) \triangleq
+                            \begin{bmatrix}
+                                v_{i1}\\
+                                \vdots\\
+                                v_{in}
+                            \end{bmatrix} \in \mathbb{C}^{mn}
+
+                            \qquad
+
+                            \hat{\phi}(V_i) \triangleq
+                            \begin{bmatrix}
+                                \phi(v_{i1})\\
+                                \vdots\\
+                                \phi(v_{in})
+                            \end{bmatrix} \in \mathbb{C}^{Nmn}
+                        \]
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Kronecker Product:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            The Kronecker product of \(L,K \in \mathbb{B}(\mathbb{C}^n)\)
+                            is denoted by \(L \otimes K\) and is a \(\mathbb{B}(\mathbb{C}^n)\)
+                            matrix defined by:
+                        </p>
+
+                        \[
+                            L \otimes K =
+                            \begin{bmatrix}
+                                l_{1,1}K & l_{1,2}K & \ldots & l_{1,n}K\\
+                                l_{2,1}K & l_{2,2}K & \ldots & l_{2,n}K\\
+                                \vdots & \vdots & \ddots & \cdots\\
+                                l_{n,1}K & l_{n,2}K & \ldots & l_{n,n}K\\
+                            \end{bmatrix}
+                        \]
+					</div>
+                </section>
+
+                                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Kronecker Product:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            And the following properties holds:
+                        </p>
+
+                        \[
+                            (L \otimes K)^* = L^* \otimes K^*
+                        \]
+
+                        \[
+                            \phi(LKH) = (H' \otimes L)\phi(K), H \in \mathbb{B}(\mathbb{C}^n)
+                        \]
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Homeomorphic Spaces:</h2>
+                    </div>
+
+                    <div class="slide-content" style="font-size: 0.95em;">
+                        <p>
+                            A mapping \(G : (X,d_1) \to (Y,d_2)\) is saitd to be a homeomorphism
+                            if \(G\) is invertible and \(G,G^{-1}\) are continuous.
+                        </p>
+
+                        <p>
+                            Two metric spaces \((X,d_1)\) and \((Y,d2)\) are said to be homeomorphic
+                            if there exists a homeomorphism mapping one of them onto the other. 
+                        </p>
+
+                        <p>
+                            It is easy to verify, through the mapping \(\hat{\phi}\), that the spaces
+                            \(\mathbb{H}^{n,m}\) and \(\mathbb{C}^{Nmn}\) are uniformly homeomorphic and that
+                            any operator \(Z \in \mathbb{B}(\mathbb{H}^{n,m})\) can be represented in \(\mathbb{B}(\mathbb{C}^{Nmn})\)
+                            through the mapping \(\hat{\phi}\). We shall denote this operator by \(\hat{\phi}[Z]\).
+                            And we must have:
+                        </p>
+
+                        \[
+                            r_{\sigma}(Z) = r_{\sigma}[\hat{\phi}[Z]]
+                        \]
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Orthogonal Matrix:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            If \(W \in \mathbb{B}(\mathbb{C}^n)^{+}\) then there exists a unique
+                            \(W^{1/2} \in \mathbb{B}(\mathbb{C}^{+})\) such that \(W = (W^{1/2})^2\).
+                            The absolute value of \(W \in \mathbb{B}(\mathbb{C}^n)\), denoted by
+                            \(|W|\), is defined as \(|W| \triangleq (W^*W)^{1/2}\).
+                        </p>
+
+                        <p>
+                            Then, there exists an orthogonal matrix \(U \in \mathbb{B}(\mathbb{C})^n\)
+                            (that is \(U^{-1} = U\)), such that:
+                        </p>
+
+                        \[
+                            W = U |W| \quad \text{or} |W| = U^{-1}W = U^*W
+                        \]
+                        \[
+                            ||W|| = |\mid |W| \mid|
+                        \]
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Self-adjoint:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>
+                            For any \(W \in \mathbb{B}(\mathbb{C}^n)\) there exists \(W^j, j = 1,2,3,4\)
+                            such that \(W^j \geq 0\) and \(||W^j|| \leq ||W||\) for \(j = 1,2,3,4\)
+                            and \(W = (W^1 - W^2) + \sqrt{-1}(W^3 - W^4)\). We can write:
+                        </p>
+
+                        \[
+                            W = V^{1} + \sqrt{-1}V^2
+                        \]
+
+                        <p>
+                            where:
+                        </p>
+
+                        \[
+                            V^1 = \frac{1}{2}(W^* + W) \qquad V^2 = \frac{\sqrt{-1}}{2}(W^* - W)
+                        \]
+					</div>
+                </section>
+
+                <!-- ====================================================== -->
+				<section data-hide-slide-number="true" data-transition="slide">
+					<div class="slide-title">
+                        <h2>Self-adjoint:</h2>
+                    </div>
+
+                    <div class="slide-content">
+                        <p>Since \(V_1\) and \(V_2\) are self-adjoint (that is,
+                        \(Vî = V^{i*}, i = 1,2\)), and every self-adjoint element in
+                        \(\mathbb{B}(\mathbb{C}^n)\) can be decomposed into positive and negative parts,
+                        we have that there exist a \(W^i \in \mathbb{B}(\mathbb{C}^n), i = 1,2,3,4\), such that:
+                        </p>
+
+                        \[
+                            V^1 = W^1 - W^2 \qquad V^2 = W^3 - W^4
+                        \]
+
+                        <p>
+                            Therefore for any \(S = (S_1,\ldots,S_N) \in \mathbb{H}^n\),
+                            we can find \(S^j \in \mathbb{H}^{n^+}, j = 1,2,3,4\) such that
+                            \(||S^j||_1 \leq ||S||_1\) and:
+                        </p>
+
+                        \[
+                            S = (S^1 - S^2) + \sqrt{-1}(S^3 - S^4)
+                        \]
+					</div>
+                </section>
+
+            </div>
+        </div>
+
+        <script src="../../dist/reveal.js"></script>
+		<script src="../../plugin/notes/notes.js"></script>
+		<script src="../../plugin/markdown/markdown.js"></script>
+		<script src="../../plugin/highlight/highlight.js"></script>
+		<script src="../../plugin/math/math.js"></script>
+		<script src="../../init.js"></script>
+    </body>
+</html>
