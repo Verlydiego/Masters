@@ -70,7 +70,25 @@
 	    				<h2>Discrete-Time MJLS Definition:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Consider the discrete-time linear system with Markovian parameters:
+                        </p>
+
+                        \[
+                        \mathcal{G} =
+                        \begin{cases}
+                            x(k+1) = A_{\theta(k)}x(k) + B_{\theta(k)}u(k) + G_{\theta(k)}\omega(k)\\
+                            y(k) = L_{\theta(k)}x(k) + H_{\theta(k)}\omega(k)\\
+                            z(k) = C_{\theta(k)}x(k) + D_{\theta(k)}u(k)\\
+                            x(0) = x_0\\
+                            \theta(0) = \theta_0
+                        \end{cases}
+                        \]
+
+                        <p>
+                            where \(\{\theta(k)\}_{k \geq 0}\) is a discrete-time Markov chain
+                            taking values in a finite set \(\mathbb{K} = \{1,2,\ldots, N\}\).
+                        </p>
 				    </div>
 				</section>
 
@@ -80,7 +98,23 @@
 	    				<h2>Homogeneous MJLS:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            The homogeneous MJLS is defined as:
+                        </p>
+
+                        \[
+                            \mathcal{G} =
+                            \begin{cases}
+                                x(k+1) = \Gamma_{\theta(k)}x(k)\\
+                                x(0) = x_0\\
+                                \theta(0) = \theta_0
+                            \end{cases}
+                        \]
+
+                        <p>
+                            Although \(x(k)\) is not a Markov process, the joint
+                            process \(\{x(k),\theta(k)\}\) is.
+                        </p>
 				    </div>
 				</section>
 
@@ -90,7 +124,22 @@
 	    				<h2>Main Operators:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Define the following operators in the Markovian framework
+                            via the augmented state \((x(k),\theta(k))\):
+                        </p>
+
+                        \[
+                            \mathcal{T}(V) \triangleq (\mathcal{T}_1(V), \ldots, \mathcal{T}_N(V))
+                        \]
+
+                        \[
+                            \mathcal{T}_j(V) \triangleq \sum_{j=1}^{N}{p_{ij}\Gamma_i V_i \Gamma_i^*}
+                        \]
+
+                        \[
+                            \mathcal{A} \triangleq (P' \otimes I_n)diag[\bar{\Gamma}_i \otimes \Gamma_i]
+                        \]
 				    </div>
 				</section>
 
@@ -100,7 +149,37 @@
 	    				<h2>Mean Square Stability:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+                        <p>&nbsp;</p>
+						<p>
+                            We say that a MJLS is mean square stable (MSS) if
+                            \(\mathbb{E}[x(k)x(k)^*]\) converges as \(k\) goes to infinity.
+                        </p>
+
+                        <p>
+                            MSS is equivalent to the spectral radius of an augmented matrix
+                            being less than one. Which shows the connection between MSS
+                            and the probability of visits to the unstable modes.
+                        </p>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Mean Square Stability:</h2>
+					</div>
+					<div class="slide-content">
+                        <p>&nbsp;</p>
+						<p>
+                            MSS is equivalent to the existence of a solution to a set
+                            of coupled Lyapunov equations. The Lyapunov equations can be
+                            written down in for equivalent forms that rpovides a sufficient condition.
+                        </p>
+
+                        <p>
+                            *The stability of all modes of operation is neither necessary nor sufficient
+                            for global stability of the system.
+                        </p>
 				    </div>
 				</section>
 
@@ -110,7 +189,48 @@
 	    				<h2>MSS - Homogeneous Case:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            For the homogeneous case, the system is MSS if:
+                        </p>
+
+                        <ul>
+                            <li>\(r_\sigma(\mathcal{A}) < 1\)</li>
+                            <li>For any \(S > 0\) there exists a unique \(V > 0\), such that</li>
+                            \[
+                                V - \mathcal{T}(V) = S
+                            \]
+                            <li>For some \(V > 0\):</li>
+                            \[
+                                V - \mathcal{T}(V) > 0
+                            \]
+                        </ul>
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>MSS - Homogeneous Case:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            For the homogeneous case, the system is MSS if:
+                        </p>
+
+                        <ul>
+                            <li>
+                                For some \(\beta \geq 1, 0 < \zeta < 1, \forall x_0,\forall \theta_0\):
+                            </li>
+
+                            \[
+                                \mathbb{E}[||x||^2] \leq \beta \zeta^k ||X_0||^2_2, \quad k = 0,1,\ldots
+                            \]
+
+                            <li>For all \(x_0, \theta_0\):</li>
+                            \[
+                                \lim_{k \to 0}\mathbb{E}[||x(k)||^2] < \infty
+                            \]
+                        </ul>
 				    </div>
 				</section>
 
@@ -120,7 +240,28 @@
 	    				<h2>MSS - Homogeneous Case - Example:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Consider the following system with two operation modes,
+                            defined by the matrices:
+                        </p>
+
+                        \[
+                            A_1 = \left[\frac{4}{3}\right]
+                            \quad
+                            A_2 = \left[\frac{1}{3}\right]
+                        \]
+
+                        <p>
+                            And the transition probability matrix is:
+                        </p>
+
+                        \[
+                            P =
+                            \begin{bmatrix}
+                                \frac{1}{2} & \frac{1}{2}\\
+                                \frac{1}{2} & \frac{1}{2}
+                            \end{bmatrix}
+                        \]
 				    </div>
 				</section>
 
@@ -130,7 +271,52 @@
 	    				<h2>MSS - Homogeneous Case - Example:(1)</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>We have:</p>
+
+                        \[
+                            \bar{A}_1 \otimes A_1 = \frac{4}{3} \cdot \frac{4}{3} = \frac{16}{9},
+                            \quad
+                            \bar{A}_2 \otimes A_2 = \frac{1}{3} \cdot \frac{1}{3} = \frac{1}{9}
+                        \]
+
+                        <p>And the operator:</p>
+
+                        \[
+                            \mathcal{A} \triangleq (P' \otimes I_n)diag[\bar{\Gamma}_i \otimes \Gamma_i]
+                        \]
+
+                        \[
+                            \mathcal{A} =
+                            \begin{bmatrix}
+                                \frac{1}{2} & \frac{1}{2}\\
+                                \frac{1}{2} & \frac{1}{2}
+                            \end{bmatrix}
+                            \begin{bmatrix}
+                                \frac{16}{2} & 0\\
+                                0 & \frac{1}{9}
+                            \end{bmatrix} = \frac{1}{2}
+                            \begin{bmatrix}
+                                \frac{16}{9} & \frac{1}{9}\\
+                                \frac{16}{9} & \frac{1}{9}
+                            \end{bmatrix}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>MSS - Homogeneous Case - Example:(1)</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The spectral radius of a matrix is given by the maximum
+                            absolute value of its eigenvalues:
+                        </p>
+
+                        \[
+                            r_{\sigma}(\mathcal{A}) = \frac{1}{2} \cdot \frac{17}{9} = \frac{17}{18} < 1
+                        \]
 				    </div>
 				</section>
 
@@ -140,7 +326,21 @@
 	    				<h2>MSS - Homogeneous Case - Example:(2)</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Now consider \(S = \frac{1}{18}\), then:
+                        </p>
+
+                        \[
+                            V_j - \frac{1}{2}\left(\frac{16}{9}V_1 + \frac{1}{9}V_2\right) = \frac{1}{18}, \quad j = 1,2
+                        \]
+                        \[
+                            V_1 - \frac{1}{2}\left(\frac{16}{9}V_1 + \frac{1}{9}V_2\right) = \frac{1}{18} \to 2V_1 - V_2 = 1
+                        \]
+                        \[
+                            V_2 - \frac{1}{2}\left(\frac{16}{9}V_1 + \frac{1}{9}V_2\right) = \frac{1}{18} \to -16V_1 + 17V_2 = 1
+                        \]
+
+                        <p>Which have positive-definite solutions \(V_1 = 1,V_2 = 1\)</p>
 				    </div>
 				</section>
 
@@ -150,7 +350,36 @@
 	    				<h2>MSS - Homogeneous Case - Example:(3)</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            We want to find \(V_1 > 0\) and \(V_2 > 0\) that satisfies
+                            \(V_j - \mathcal{T}_j(V) > 0\) for \(j = 1,2\):
+                        </p>
+
+                        \[
+                            V_1 - \frac{1}{2}\left(\frac{16}{9}V_1 + \frac{1}{9}V_2\right) > 0 \to 2V_1 > V_2
+                        \]
+
+                        \[
+                            V_2 - \frac{1}{2}\left(\frac{16}{9}V_1 + \frac{1}{9}V_2\right) > 0 \to 17V_2 > 16V_1
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>MSS - Homogeneous Case - Example:(3)</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            The system is MSS if there is any \(V > 0\) that satisfies:
+                        </p>
+
+                        \[
+                            \frac{16}{17}V_1 < V_2 < 2V_1
+                        \]
+
+                        <p>Which is true for \(V_1 = 1\) and \(V_2 = 1\).</p>
 				    </div>
 				</section>
 
@@ -160,7 +389,19 @@
 	    				<h2>MSS - Homogeneous Case - Example:(4)</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Define:
+                        </p>
+                        \[
+                            Q_j(k) \triangleq \mathbb{E}[x(k)x(k)^*\mathbf{1}_{\{\theta(k) = j\}}] 
+                        \]
+                        <p>Thus:</p>
+                        \[
+                            Q_1(k+1) = p_{11}\Gamma_1Q_1(k)\Gamma_1^* + p_{12}\Gamma^2Q_2(k)\Gamma_2^*
+                        \]
+                        \[
+                            Q_1(k+1) = \frac{16}{18}Q_1(k) + \frac{1}{18}Q_2(k)
+                        \]
 				    </div>
 				</section>
 
@@ -170,7 +411,21 @@
 	    				<h2>MSS - Homogeneous Case - Example:(4)</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Define:
+                        </p>
+                        \[
+                            Q_j(k) \triangleq \mathbb{E}[x(k)x(k)^*\mathbf{1}_{\{\theta(k) = j\}}] 
+                        \]
+                        <p>Thus:</p>
+                        \[
+                            Q_2(k+1) = p_{21}\Gamma_1Q_1(k)\Gamma_1^* + p_{22}\Gamma^2Q_2(k)\Gamma_2^*
+                        \]
+                        \[
+                            Q_2(k+1) = \frac{16}{18}Q_1(k) + \frac{1}{18}Q_2(k)
+                        \]
+
+                        <p>*Note that for any \(k \geq 1\), we have \(Q_1(k) = Q_2(k)\).</p>
 				    </div>
 				</section>
 
@@ -180,7 +435,21 @@
 	    				<h2>MSS - Homogeneous Case - Example:(4)</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            So, the total energy becomes:
+                        </p>
+
+                        \[
+                            \mathbb{E}[||x(k+1)||^2] = Q_1(k+1) + Q_2(k+1) = 2\left(\frac{17}{18}Q_1(k)\right)
+                        \]
+
+                        <p>
+                            But we know that:
+                        </p>
+
+                        \[
+                            \mathbb{E}[||x(k)||^2] = Q_1(k) + Q_2(k) = 2Q_1(k)
+                        \]
 				    </div>
 				</section>
 
@@ -190,7 +459,85 @@
 	    				<h2>MSS - Homogeneous Case - Example:(4)</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Hence:
+                        </p>
+                        \[
+                            \mathbb{E}[||x(k+1)||^2] = \frac{17}{18}\mathbb{E}[||x||^2]
+                        \]
+
+                        <p>
+                            This is our decay rate:
+                        </p>
+
+                        \[
+                            \zeta = \frac{17}{18}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>MSS - Homogeneous Case - Example:(4)</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            At time \(k = 0\), the total energy is \(||x_0||^2\).
+                            At time \(k = 1\), the energy is given by:
+                        </p>
+
+                        \[
+                            \mathbb{E}[||x(1)||^2] = Q_1(1) + Q_2(1) = \frac{16}{9}Q_1(0) + \frac{1}{9}Q_2(0)
+                        \]
+
+                        <p>
+                            We must ensure that the inequality holds for the worst-case initial condition
+                            (\(Q_1 = ||x_0||^2\) and \(Q_2 = 0\)):
+                        </p>
+
+                        \[
+                            \mathbb{E}[||x(1)||^2] = \frac{16}{9}||x_0||^2
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>MSS - Homogeneous Case - Example:(4)</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Thus, we can get the upper bound that can account for the temporary growth
+                            of the system energy:
+                        </p>
+
+                        \[
+                            \frac{16}{9}||x_0||^2 \leq \beta\left(\frac{17}{18}\right)^1||x_0||^2 \to \beta \geq \frac{32}{17}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>MSS - Homogeneous Case - Example:(4)</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Therefore, we have:
+                        </p>
+
+                        \[
+                            \zeta = \frac{17}{18} < 1, \quad \beta = \frac{32}{17} > 1
+                        \]
+
+                        <p>
+                            Since there exist constants \(\beta\) and \(\zeta\) within the
+                            required interval that satisfy the inequality \(\mathbb{E}[||x||^2] \leq \beta\zeta^k||x_0||^2\)
+                            for the entire trajectory, the system is MSS.
+                        </p>
 				    </div>
 				</section>
 
@@ -200,7 +547,15 @@
 	    				<h2>MSS - Homogeneous Case - Example:(5)</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Consider that for \(i = 1,2\) and \(j = 1,2\):
+                        </p>
+
+                        \[
+                            \mathbb{E}[x(k+1)x(k+1^*)\mathbf{1}_{\{\theta(k) = j\}}] =
+                            \sum_{i=1}^{N}{p_{ij}\Gamma_i\mathbb{E}[x(k)x(k)^*\mathbf{1}_{\{\theta(k) = i\}}]\Gamma_i^*}
+                        \]
+
 				    </div>
 				</section>
 
@@ -210,7 +565,68 @@
 	    				<h2>MSS - Homogeneous Case - Example:(5)</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Thus:
+                        </p>
+
+                        \[
+                            \mathbb{E}[x(k+1)x(k+1^*)\mathbf{1}_{\{\theta(k) = 1\}}] =\\
+                            p_{11}\Gamma_1\mathbb{E}[x(k)x(k)^*\mathbf{1}_{\{\theta(k) = 1\}}]\Gamma_1^* +\\
+                            p_{21}\Gamma_2\mathbb{E}[x(k)x(k)^*\mathbf{1}_{\{\theta(k) = 2\}}]\Gamma_2^*
+                        \]
+
+                        \[
+                            \mathbb{E}[x(k+1)x(k+1^*)\mathbf{1}_{\{\theta(k) = 2\}}] =\\
+                            p_{12}\Gamma_1\mathbb{E}[x(k)x(k)^*\mathbf{1}_{\{\theta(k) = 1\}}]\Gamma_1^* +\\
+                            p_{22}\Gamma_2\mathbb{E}[x(k)x(k)^*\mathbf{1}_{\{\theta(k) = 2\}}]\Gamma_2^*
+                        \]
+
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>MSS - Homogeneous Case - Example:(5)</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Hence:
+                        </p>
+
+                        \[
+                            \mathbb{E}[x(k+1)x(k+1^*)] =\\
+                            p_{11}\Gamma_1\mathbb{E}[x(k)x(k)^*\mathbf{1}_{\{\theta(k) = 1\}}]\Gamma_1^* +\\
+                            p_{21}\Gamma_2\mathbb{E}[x(k)x(k)^*\mathbf{1}_{\{\theta(k) = 2\}}]\Gamma_2^*\\
+                            p_{12}\Gamma_1\mathbb{E}[x(k)x(k)^*\mathbf{1}_{\{\theta(k) = 1\}}]\Gamma_1^* +\\
+                            p_{22}\Gamma_2\mathbb{E}[x(k)x(k)^*\mathbf{1}_{\{\theta(k) = 2\}}]\Gamma_2^*
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>MSS - Homogeneous Case - Example:(5)</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            On the Steady-state:
+                        </p>
+
+                        \[
+                            \lim_{k \to \infty} \mathbb{E}[x(k)x(k)^*] = 
+                            \lim_{k \to \infty}\left(2 \cdot \frac{1}{2} \cdot \frac{16}{9}\mathbb{E}[x(k)x(k)^*]\right) +\\
+                            \lim_{k \to \infty}\left(2 \cdot \frac{1}{2} \cdot \frac{1}{9}\mathbb{E}[x(k)x(k)^*]\right)
+                        \]
+
+                        \[
+                            \lim_{k \to \infty} \mathbb{E}[x(k)x(k)^*] = 0
+                        \]
+
+                        <p>
+                            Which means the model is MSS.
+                        </p>
 				    </div>
 				</section>
 
@@ -220,7 +636,44 @@
 	    				<h2>Mode-Based Representation:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            When the Markov chain is in mode \(\theta(k) = i \in \mathbb{K}\),
+                            the system matrices are:
+                        </p>
+                        \[
+                            A_{\theta(k)} = A_i, \quad
+                            B_{\theta(k)} = B_i, \quad
+                            C_{\theta(k)} = C_i, \quad
+                            D_{\theta(k)} = D_i, \quad
+                        \]
+
+                        <p>
+                            Hence, the system switches between \(N\) different LTI models:
+                        </p>
+
+                        \[
+                            x_{k+1} = A_ix_k + B_iu_k + D_i\omega_k, \quad \text{when } \theta(k) = i
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Mode-Based Representation:</h2>
+					</div>
+					<div class="slide-content">
+						<p>And the system is MSS if, and only if, there exists symmetric
+                            positive definite matrices \(\{P_i\}, i = 1, \ldots, N\) such that:
+                        </p>
+
+                        \[
+                            \Gamma_i^*\left(\sum_{j}{p_{ij}P_j}\right)\Gamma_i - P_i \prec 0, \quad \forall i \in \mathbb{K}
+                        \]
+
+                        <p>
+                            where \(P_{\theta(k)}\) takes the value \(P_i = P_i^* \succ 0\) when \(\theta(k) = i\).
+                        </p>
 				    </div>
 				</section>
 
@@ -230,7 +683,63 @@
 	    				<h2>non-Homogeneous MJLS:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            The non-homogeneous MJLS is modeled by:
+                        </p>
+
+                        \[
+                            \mathcal{G} =
+                            \begin{cases}
+                                x(k+1) = \Gamma_{\theta(k)}x(k) + G_{\theta(k)}\omega(k)\\
+                                x(0) = x_0\\
+                                \theta(0) = \theta_0
+                            \end{cases}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>non-Homogeneous MJLS:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Regarding to the additive disturbance, we analyze two cases:
+                        </p>
+
+                        <ul>
+                            <li>
+                                Wide Sense Stationary (WSS) random variables, which are
+                                systems that include an external additive disturbance.
+                            </li>
+
+                            <li>
+                                Input sequences \(\omega(k)\) that belongs to the space \(\ell_2\)
+                                (signals with finite energy).
+                            </li>
+                        </ul>
+				    </div>
+				</section>
+
+
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>MSS - non-Homogeneous Case 01:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            We must consider the assumption that \(\{\theta(k), k = 0,1,\ldots\}\)
+                            is an ergodic Markov chain (i.e. there are no repetitive cycles).
+                        </p>
+
+                        <p>
+                            A system is asymptotically wide sense stationary (AWSS) if its mean
+                            and its second-moment matrix sequence converges as \(k \to \infty\)
+                            to values that are independent of the initial conditions.
+                        </p>
 				    </div>
 				</section>
 
@@ -240,7 +749,21 @@
 	    				<h2>MSS - non-Homogeneous Case 01:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>Where:</p>
+
+                        \[
+                            \mu(k) = \mathbb{E}[x(k)]
+                        \]
+                        \[
+                            U(k,l) \triangleq (U_1(k,l), \ldots, U_N(k,l))
+                        \]
+                        \[
+                            U_j(k,l) \triangleq \mathbb{E}[x(k+1)x(k)^*\mathbb{1}_{\{\theta(k+l) = j\}}]
+                        \]
+                        \[
+                            \mathbb{U}(k,l) \triangleq \mathbb{E}[x(k+l)x(k)^*] =
+                            \sum_{i=1}^{N}{U_i(k,l)}
+                        \]
 				    </div>
 				</section>
 
@@ -250,7 +773,15 @@
 	    				<h2>MSS - non-Homogeneous Case 01:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            A non-homogeneous system is MSS if, and only if, the corresponding
+                            homogeneous system is MSS, which is also equivalent to the system being AWSS.
+                        </p>
+
+                        <p>
+                            If \(r_\sigma(\mathcal{T}) < 1\), the first and second moments will converge
+                            to unique stationary solutions.
+                        </p>
 				    </div>
 				</section>
 
@@ -260,7 +791,20 @@
 	    				<h2>MSS - non-Homogeneous Case 02:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Stability in this case means the system acts as a bounded linear operator that maps
+                            \(\ell_2\) input signas into \(\ell_2\) state sequences.
+                        </p>
+                        
+                        <p>
+                            Thus \(r_\sigma(\mathcal{T}) < 1\) is a necessary and sufficient condition for the MJLS to be stable.
+                        </p>
+
+                        <p>
+                            This means that whenever the input disturbance has finite energy, the system remains stable and the
+                            state sequence has finite energy.
+                        </p>
+
 				    </div>
 				</section>
 
@@ -270,7 +814,25 @@
 	    				<h2>Mean Square Stability and Detectability:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Consider the system:
+                        </p>
+
+                        \[
+                            \mathcal{G} =
+                            \begin{cases}
+                                x(k+1) = A_{\theta(k)}x(k) + B_{\theta(k)}u(k)\\
+                                y(k) = C_{\theta(k)}x(k)\\
+                                x(0) = x_0\\
+                                \theta(0) = \theta_0
+                            \end{cases}
+                        \]
+
+                        <p>
+                            The concepts of stability and detectability in the Markovian context
+                            are natural extensions of their deterministic counterparts, with the deterministic
+                            case being a special case of the definitions that follow.
+                        </p>
 				    </div>
 				</section>
 
@@ -280,7 +842,59 @@
 	    				<h2>Mean Square Stability:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Let \(A = (A_1, \ldots, A_N)\) and \(B = (B_1, \ldots, B_N)\).
+                            We say that a pair \((A,B)\) is mean square stabilizable if
+                            there is \(F = (F_1, \ldots, F_N)\) such that the system is MSS when:
+                        </p>
+
+                        \[
+                            u(k) = F_{\theta(k)}x(k)
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Mean Square Stability:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            <b>Mean square stability test:</b> The pair \((A,B)\) is mean
+                            square stabilizable if, and only if, there are:
+                        </p>
+
+                        \[
+                            W_1 = (W_{11}, \ldots, W_{N1}),
+                            \\
+                            W_2 = (W_{12}, \ldots, W_{N2}),
+                            \\
+                            W_1 = (W_{13}, \ldots, W_{N3}).
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Mean Square Stability:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Such that \(\forall j \in \mathbb{N}\):
+                        </p>
+
+                        \[
+                            \sum_{i=1}^{N}{p_{ij}(A_iW_{i1}A_i^* + B_iW_{i2}^*A_i^* + A_iW_{i2}B_i^* + B_iW_{i3}B_i^*)} - W_{j1} < 0
+                        \]
+
+                        \[
+                            \begin{bmatrix}
+                                W_{j1} & W_{j2}\\
+                                W_{j2}^* & W_{j3}
+                            \end{bmatrix} \geq 0 \qquad W_{j1} > 0
+                        \]
 				    </div>
 				</section>
 
@@ -290,7 +904,67 @@
 	    				<h2>Mean Square Detectability:</h2>
 					</div>
 					<div class="slide-content">
-						<p></p>
+						<p>
+                            Let \(C = (C_1,\ldots,C_N)\). We say that the pair \((C,A)\)
+                            is mean square detectable if there is \(H = (H_1,\ldots, H_N)\)
+                            such that \(r_\sigma(\mathcal{T}) < 1\) with:
+                        </p>
+
+                        \[
+                            \Gamma_i = A_i + H_iC_i \quad \text{for } i \in \mathbb{N}
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Mean Square Detectability:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            <b>Mean square Detectability Test:</b> The pair \((C,A)\)
+                            is mean square detectable if, and only if, there are:
+                        </p>
+
+                        \[
+                            W_1 = (W_{11}, \ldots, W_{N1}),
+                            \\
+                            W_2 = (W_{12}, \ldots, W_{N2}),
+                            \\
+                            W_1 = (W_{13}, \ldots, W_{N3}).
+                            \\
+                            Z = (Z_1, \ldots, Z_N)
+                        \]
+				    </div>
+				</section>
+
+                <!-- ====================================================== -->
+				<section>
+					<div class="slide-title">
+	    				<h2>Mean Square Detectability:</h2>
+					</div>
+					<div class="slide-content">
+						<p>
+                            Such that \(\forall j \in \mathbb{N}\):
+                        </p>
+
+                        \[
+                            A_i^*Z_iA_i + C_i^*W_{i2}^*A_i + A_i^*W_{i2}C_i + C_i^*W_{i3}C_i - W_{i1} < 0
+                        \]
+
+                        \[
+                            \begin{bmatrix}
+                                Z_i & W_{i2}\\
+                                W_{i2}^* & W_{i3}
+                            \end{bmatrix} \geq 0 
+                            \quad
+                            Z_i \geq \sum_{j=1}^{N}{p_{ij}W_1}
+                            \quad 
+                            W_{i1} > 0, 
+                            \quad 
+                            Z_i > 0
+                        \]
 				    </div>
 				</section>
 
