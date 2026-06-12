@@ -27,7 +27,7 @@
         display: flex;          /* Ativa o modo Flexbox */
         justify-content: center; /* Centraliza os botões na linha */
         flex-wrap: wrap;       /* Se não couberem todos na mesma linha, eles "pulam" para a de baixo */
-        gap: 20px;             /* Cria um espaçamento uniforme entre os botões */
+        gap: 30px;             /* Cria um espaçamento uniforme entre os botões */
       }
       
       ul li { 
@@ -37,15 +37,23 @@
       /* Mantém o estilo dos botões com neon azul */
       ul li a {
         display: inline-block;
-        padding: 15px 25px;
+        
+        /* AUMENTO DO TAMANHO: Ajuste estes valores conforme sua preferência */
+        padding: 20px 40px;      /* Aumenta a área do botão (Vertical e Horizontal) */
+        font-size: 1.5em;        /* Aumenta o tamanho do texto da aula */
+        
         background-color: #ff8c00; 
         color: black;              
         text-decoration: none;
-        border-radius: 10px;
+        border-radius: 12px;     /* Bordas levemente mais arredondadas para combinar */
         font-weight: bold;
-        font-size: 1.1em;
+        font-family: 'Montserrat', sans-serif; /* Usando a fonte moderna que sugerimos */
         transition: 0.4s;
-        box-shadow: 0 0 5px #00e5ff, 0 0 15px #00e5ff, 0 0 25px #00e5ff;
+        
+        /* Mantém o efeito Neon Azul Claro */
+        box-shadow: 0 0 10px #00e5ff, 
+                    0 0 20px #00e5ff, 
+                    0 0 30px #00e5ff;
       }
     
       ul li a:hover {
