@@ -57,52 +57,77 @@ function [A_aux,B_aux,C_aux] = Truncated_Normal_Distribution(A,B,C)
     Delta_real_A = [];
     
     if ~isempty(lambda_real_A)
-        
+
         a_real_A = min(lambda_real_A);
         b_real_A = max(lambda_real_A);
     
         mu_real_A = mean(lambda_real_A);
         gamma_real_A = var(lambda_real_A);
+
+        if length(lambda_real_A) == 1
+
+            Delta_real_A = lambda_real_A;
+        
+        else
     
-        pd_real_A = truncate(makedist('Normal','mu',mu_real_A,'sigma',sqrt(gamma_real_A)),a_real_A,b_real_A);
+            pd_real_A = truncate(makedist('Normal','mu',mu_real_A,'sigma',sqrt(gamma_real_A)),a_real_A,b_real_A);
     
-        tau_real_A = length(lambda_real_A);
+            tau_real_A = length(lambda_real_A);
     
-        Delta_real_A = random(pd_real_A, tau_real_A,1);
+            Delta_real_A = random(pd_real_A, tau_real_A,1);
+
+        end
     end
     
     % Generate complex poles:
     
     Delta_im_A = [];
+
+    tau_im_A = length(lambda_im_A);
     
     if ~isempty(lambda_im_A)
         
         % For the radii:
-    
-        a_rad_A = min(lambda_rad_A);
-        b_rad_A = max(lambda_rad_A);
-    
-        mu_rad_A = mean(lambda_rad_A);
-        gamma_rad_A = var(lambda_rad_A);
-    
-        pd_rad_A = truncate(makedist('Normal','mu',mu_rad_A,'sigma',sqrt(gamma_rad_A)),a_rad_A,b_rad_A);
+        
+        if length(lambda_rad_A) == 1 
+
+            r = lambda_rad_A;
+
+        else
+
+            a_rad_A = min(lambda_rad_A);
+            b_rad_A = max(lambda_rad_A);
+        
+            mu_rad_A = mean(lambda_rad_A);
+            gamma_rad_A = var(lambda_rad_A);
+        
+            pd_rad_A = truncate(makedist('Normal','mu',mu_rad_A,'sigma',sqrt(gamma_rad_A)),a_rad_A,b_rad_A);
+
+            r = random(pd_rad_A,tau_im_A,1);
+
+        end
     
         % For the angle:
+
+        if length(lambda_ang_A) == 1
+
+            phi = lambda_ang_A;
+
+        else
     
-        a_ang_A = min(lambda_ang_A);
-        b_ang_A = max(lambda_ang_A);
-    
-        mu_ang_A = mean(lambda_ang_A);
-        gamma_ang_A = var(lambda_ang_A);
-    
-        pd_ang_A = truncate(makedist('Normal','mu',mu_ang_A,'sigma',sqrt(gamma_ang_A)),a_ang_A,b_ang_A);
-    
-        tau_im_A = length(lambda_im_A);
-    
+            a_ang_A = min(lambda_ang_A);
+            b_ang_A = max(lambda_ang_A);
+        
+            mu_ang_A = mean(lambda_ang_A);
+            gamma_ang_A = var(lambda_ang_A);
+        
+            pd_ang_A = truncate(makedist('Normal','mu',mu_ang_A,'sigma',sqrt(gamma_ang_A)),a_ang_A,b_ang_A);
+
+            phi = random(pd_ang_A,tau_im_A,1);
+
+        end
+        
         %
-    
-        r = random(pd_rad_A,tau_im_A,1);
-        phi = random(pd_ang_A,tau_im_A,1);
     
         for k = 1:tau_im_A
             
@@ -120,8 +145,14 @@ function [A_aux,B_aux,C_aux] = Truncated_Normal_Distribution(A,B,C)
     n_aux = length(Delta_A);
     
     M = diag(Delta_A);
+
+    [Q,~] = qr(randn(n_aux));
+
+    D = diag(logspace(0,1.5,n_aux));
     
-    [U,~] = qr(randn(n_aux));
+    %D = eye(4);
+
+    U = Q*D;
     
     A_aux = inv(U)*M*U;
 end
