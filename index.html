@@ -14,23 +14,33 @@
       }
       
       ul { list-style-type: none; padding: 0; }
-      
-      ul li { margin-bottom: 10px; }
 
+      ul li { 
+        margin-bottom: 20px; /* Aumentei a margem para o brilho não sobrepor os outros */
+      }
+
+      /* ESTILO DO BOTÃO COM EFEITO NEON */
       ul li a {
         display: inline-block;
         padding: 12px 24px;
-        background-color: #ff8c00;
-        color: black;
+        background-color: #ff8c00; /* Botão Laranja */
+        color: black;              /* Texto Preto */
         text-decoration: none;
         border-radius: 8px;
         font-weight: bold;
-        transition: 0.3s;
+        transition: 0.4s;
+    
+        /* O EFEITO NEON AZUL CLARO ABAIXO */
+        box-shadow: 0 0 5px #00e5ff, 
+                    0 0 15px #00e5ff, 
+                    0 0 25px #00e5ff;
       }
-
+      
       ul li a:hover {
-        background-color: #0056b3;
-        transform: scale(1.05); /* Faz o botão crescer levemente ao passar o mouse */
+        transform: scale(1.05);
+        box-shadow: 0 0 10px #00e5ff, 
+                    0 0 30px #00e5ff, 
+                    0 0 50px #00e5ff; /* O brilho expande no hover */
       }
     </style>
   </head>
