@@ -5,61 +5,52 @@
     <title>MJLS Masterclass</title>
     
     <style>
-      
       body {
-        background-color: #2c2c2c; /* Cinza escuro */
-        color: #f0f0f0;           /* Cor do texto (quase branco) */
+        background-color: #2c2c2c; 
         font-family: Arial, sans-serif;
-        padding: 20px;
-
         text-align: center; 
+        padding: 40px 20px;
       }
-
+    
       h3 {
         color: black; 
-        
-        /* AUMENTO DA FONTE: mude o valor abaixo para ajustar o tamanho */
         font-size: 4em; 
-        
         margin-bottom: 40px;
-        font-weight: 900; /* Deixa a fonte mais "grossa" para o neon brilhar mais */
-        text-transform: uppercase; /* Opcional: deixa em letras maiúsculas para impacto */
-        
-        /* Efeito Neon Laranja no Texto */
-        text-shadow: 0 0 10px #ff8c00, 
-                     0 0 20px #ff8c00, 
-                     0 0 40px #ff8c00, 
-                     0 0 60px #ff8c00;
+        font-weight: 900;
+        text-shadow: 0 0 10px #ff8c00, 0 0 20px #ff8c00, 0 0 40px #ff8c00;
+      }
+    
+      /* ALTERAÇÃO PARA COLOCAR LADO A LADO */
+      ul { 
+        list-style-type: none; 
+        padding: 0; 
+        display: flex;          /* Ativa o modo Flexbox */
+        justify-content: center; /* Centraliza os botões na linha */
+        flex-wrap: wrap;       /* Se não couberem todos na mesma linha, eles "pulam" para a de baixo */
+        gap: 20px;             /* Cria um espaçamento uniforme entre os botões */
       }
       
-      ul { list-style-type: none; padding: 0; }
-
       ul li { 
-        margin-bottom: 20px; /* Aumentei a margem para o brilho não sobrepor os outros */
+        margin-bottom: 0;      /* Remove a margem inferior antiga */
       }
-
-      /* ESTILO DO BOTÃO COM EFEITO NEON */
+    
+      /* Mantém o estilo dos botões com neon azul */
       ul li a {
         display: inline-block;
-        padding: 12px 24px;
-        background-color: #ff8c00; /* Botão Laranja */
-        color: black;              /* Texto Preto */
+        padding: 15px 25px;
+        background-color: #ff8c00; 
+        color: black;              
         text-decoration: none;
-        border-radius: 8px;
+        border-radius: 10px;
         font-weight: bold;
+        font-size: 1.1em;
         transition: 0.4s;
-    
-        /* O EFEITO NEON AZUL CLARO ABAIXO */
-        box-shadow: 0 0 5px #00e5ff, 
-                    0 0 15px #00e5ff, 
-                    0 0 25px #00e5ff;
+        box-shadow: 0 0 5px #00e5ff, 0 0 15px #00e5ff, 0 0 25px #00e5ff;
       }
-      
+    
       ul li a:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 10px #00e5ff, 
-                    0 0 30px #00e5ff, 
-                    0 0 50px #00e5ff; /* O brilho expande no hover */
+        transform: scale(1.1);
+        box-shadow: 0 0 15px #00e5ff, 0 0 40px #00e5ff, 0 0 70px #00e5ff;
       }
     </style>
   </head>
