@@ -147,6 +147,8 @@
             flex-direction: column;
             align-items: center;
             padding-top: 68px; 
+
+            overflow: visible;
         }
 
         .section-header {
@@ -193,6 +195,7 @@
             display: inline-block;
             position: relative;
             overflow: hidden;
+            z-index: 1;
         
             padding: 25px 80px;
         
@@ -260,6 +263,7 @@
         }
 
         .masters-button:hover {
+            z-index: 100;
             transform: scale(1.1);
         
             color: #cfcfcf;
@@ -274,6 +278,8 @@
         .buttons-container {
             display: flex;
             flex-direction: column;
+
+            overflow: visible;
             /*gap: 5px;  espaçamento entre botões */
         }
 
