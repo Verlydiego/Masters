@@ -1,6 +1,7 @@
 clc; clear; close all;
 
 rng(87)
+%rng(100)
 
 %% System Matrices:
 
@@ -109,10 +110,10 @@ for i = 1:l
     % Assembly of the extended A matrix for each mode i
     % Structure: [ A_sys    0   ]
     %            [ A_coup   A_i ]
-    % A_comp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
-    %                  zeros(n_aux, n_sys),              A_aux_set(:,:,i)];
     A_comp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
-                     A_coup,              A_aux_set(:,:,i)];
+                     zeros(n_aux, n_sys),              A_aux_set(:,:,i)];
+    % A_comp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
+    %                  A_coup,              A_aux_set(:,:,i)];
 end
 
 % --- Constant Extended B and C Matrices ---
@@ -121,18 +122,18 @@ end
 % Extended Input Matrix (B_comp)
 % Structure: [ B_sys    0     ]
 %            [ B_coup   B_aux ]
-% B_comp = [B_sys,               zeros(n_sys, m_aux);
-%           zeros(n_aux, m_sys), B_aux];
 B_comp = [B_sys,               zeros(n_sys, m_aux);
-          B_coup,              B_aux];
+          zeros(n_aux, m_sys), B_aux];
+% B_comp = [B_sys,               zeros(n_sys, m_aux);
+%           B_coup,              B_aux];
 
 % Extended Output Matrix (C_comp)
 % Structure: [ C_sys    0     ]
 %            [ C_coup   C_aux ]
-% C_comp = [C_sys,               zeros(p_sys, n_aux);
-%           zeros(p_aux, n_sys), C_aux];
 C_comp = [C_sys,               zeros(p_sys, n_aux);
-          C_coup,              C_aux];
+          zeros(p_aux, n_sys), C_aux];
+% C_comp = [C_sys,               zeros(p_sys, n_aux);
+%           C_coup,              C_aux];
 
 fprintf('Extended System matrices (A_comp, B_comp, C_comp) successfully built.\n');
 
@@ -167,9 +168,12 @@ T_sim = 10000; % Simulation horizon
 
 % --- State Initialization ---
 x_real = zeros(n_total, T_sim);    % Real state of the extended system
-%x_real(:,1) = 0.5*eye(n_total,1);
 x_hat  = zeros(n_total, T_sim);    % Estimated state by the observer
 x_a    = zeros(n_total, T_sim);    % Internal state of the attacker model
+
+% x_a(:,1) = 0.5*ones(n_total,1);
+% x_real(:,1) = 0.5*ones(n_total,1);
+% x_hat(:,1) = 0.5*ones(n_total,1);
 
 %% Markov Chain Generation
 
@@ -181,6 +185,16 @@ k_markov_start = 3000;    % Start of Markov chain switching
 P_matrix = [0.77, 0.23; 
             0.36, 0.64];
 
+% P_matrix = [
+%     0.1238, 0.3142, 0.2419, 0.1978, 0.0516, 0.0515, 0.0192;
+%     0.2057, 0.1428, 0.1682, 0.0049, 0.2303, 0.1977, 0.0504;
+%     0.0719, 0.0725, 0.1203, 0.2075, 0.1708, 0.1151, 0.2419;
+%     0.0507, 0.1061, 0.1331, 0.1656, 0.2852, 0.0725, 0.1868;
+%     0.1744, 0.0137, 0.1789, 0.0502, 0.0191, 0.2794, 0.2843;
+%     0.2738, 0.1032, 0.0331, 0.2318, 0.1491, 0.0413, 0.1677;
+%     0.0106, 0.2804, 0.0798, 0.2043, 0.0961, 0.1603, 0.1685
+% ];
+ 
 % P_matrix = [0.999, 0.001; 
 %             0.001, 0.999];
 
@@ -189,11 +203,11 @@ P_matrix = [0.77, 0.23;
             
 % S is the cumulative probability matrix to facilitate sampling 
 S = cumsum(P_matrix, 2);
-
+num_modes = size(P_matrix,2);
 theta = zeros(1, T_sim);
 theta(1:k_markov_start-1) = theta_0; 
 
-modo_atual = 2; % We start in mode 1 after mode 3
+modo_atual = 1; % We start in indice 1 of the probability transition matrix
 
 for k = k_markov_start:T_sim
 
@@ -201,21 +215,9 @@ for k = k_markov_start:T_sim
     
     if k < T_sim
         R_k = rand();
-        if R_k <= S(modo_atual, 1)
-            modo_atual = 1;
-        else
-            modo_atual = 2;
-        end
+        modo_atual = find(R_k <= S(modo_atual, :), 1, 'first');
     end
 end
-
-
-%%
-% --- Generation of the Switching Signal sigma(k) ---
-% The paper suggests switches at k=3000 and k=7000
-sigma = ones(1, T_sim);
-sigma(3000:6999) = 2;
-sigma(7000:end) = 3;
 
 %%
 % --- Definition of Inputs (u_sys and u_aux) ---
@@ -223,7 +225,7 @@ sigma(7000:end) = 3;
 u_nominal = zeros(m_sys + m_aux, T_sim);
 
 % --- Noise Parameters ---
-a_noise = 1e-6;
+a_noise = 1e-4;
 D_comp = a_noise * 0.5 * eye(n_total); % Process noise coupling
 E_comp = a_noise * 0.5 * eye(p_total); % Measurement noise coupling
 
@@ -231,16 +233,16 @@ Q_comp = D_comp * D_comp';
 R_comp = E_comp * E_comp';
 P_cov = 0.1 * eye(n_total);     % P_0|-1 (Initial covariance matrix)
 
-%%
-% --- Parâmetros para o Cálculo Recursivo do K_set (LQR) ---
-Q_lqr = eye(n_total);            % Peso nos estados [cite: 109]
-R_lqr = eye(m_sys + m_aux);      % Peso no controle [cite: 109]
-P_riccati = zeros(n_total, n_total, l); % Matrizes de Riccati para cada modo
+
+% --- Parameters for the Recursive Computation of K_set (LQR) ---
+Q_lqr = eye(n_total);            % State weighting matrix
+R_lqr = eye(m_sys + m_aux);      % Control weighting matrix
+P_riccati = zeros(n_total, n_total, l); % Riccati matrices for each mode
 for i = 1:l
-    P_riccati(:,:,i) = eye(n_total); % Inicialização
+    P_riccati(:,:,i) = eye(n_total); % Initialization
 end
-K_set = zeros(m_sys + m_aux, n_total, l); % Ganhos de controle
-%%
+K_set = zeros(m_sys + m_aux, n_total, l); % Control gains
+
 
 for k = 1:T_sim-1
     i = theta(k); % Identifies the active mode at the current time instant
@@ -249,34 +251,32 @@ for k = 1:T_sim-1
     wk = 1*randn(n_total, 1); % Process disturbance
     vk = 1*randn(p_total, 1); % Measurement noise
 
-    %% Controlador Recursivo
+    %% Recursive Controller
 
-    % 1. CÁLCULO RECURSIVO DO GANHO K_set (Equações de Riccati Acopladas)
-    % Fonte: Algoritmo 2.1 [cite: 110]
-    
-    % Calcula Psi para o modo atual (Soma ponderada pelas probabilidades de transição)
+    % 1. RECURSIVE CALCULATION OF THE K_set GAIN (Coupled Riccati Equations)
+
+    % Calculates Psi for the current mode (Weighted sum by transition probabilities)
     Psi_i = zeros(n_total, n_total);
     for j = 1:l
-        % Se o seu P_matrix for 2x2 para os modos auxiliares, ajuste os índices
-        % Aqui usamos o i e j para representar a probabilidade p_ij
+        % If your P_matrix is 2x2 for auxiliary modes, adjust the indices
+        % Here we use i and j to represent the probability p_ij
         if i <= size(P_matrix, 1) && j <= size(P_matrix, 2)
             Psi_i = Psi_i + P_riccati(:,:,j) * P_matrix(i, j);
         end
     end
 
-    % Atualiza o Ganho K_set para o modo atual i
-    % Equação: K_i = -(R + B'*Psi*B)^-1 * B'*Psi*A [cite: 110]
+    % Updates the K_set Gain for the current mode i
+    % Equation: K_i = -(R + B'*Psi*B)^-1 * B'*Psi*A
     Ai = A_comp(:,:,i);
     Bi = B_comp;
     K_set(:,:,i) = -(R_lqr + Bi' * Psi_i * Bi) \ (Bi' * Psi_i * Ai);
 
-    % Atualiza a Matriz de Riccati para o próximo passo k+1
-    % Fonte: Equação de P_theta,k no Algoritmo 2.1 [cite: 110]
+    % Updates the Riccati Matrix for the next step k+1
     P_riccati(:,:,i) = Ai' * (Psi_i - Psi_i * Bi * ((R_lqr + Bi' * Psi_i * Bi) \ (Bi' * Psi_i))) * Ai + Q_lqr;
 
-    % 2. CONTROLE NOMINAL (Malha Fechada Recursiva)
-    % u_nominal = K * x_hat corrigido (usando o ganho calculado acima)
-    u_nominal(:,k) = K_set(:,:,i) * x_hat(:,k); % [cite: 112]
+    % 2. NOMINAL CONTROL (Recursive Closed-Loop)
+    % u_nominal = K * corrected x_hat (using the gain calculated above)
+    u_nominal(:,k) = K_set(:,:,i) * x_hat(:,k);
 
     %%
     
@@ -331,7 +331,6 @@ for k = 1:T_sim-1
 
     % D.2 Calculation of Residual d_aux,k BEFORE the k+1 update (Eq. 14 / 4.10)
     % d_aux = y_star_auxiliary - y_hat_auxiliary (Innovation of the 2nd line)
-
     y_hat = C_comp * x_hat(:,k);
 
     % D.3 Update and Prediction for k+1
@@ -365,6 +364,8 @@ alarm = norma_res > J_th; % J_th is the threshold defined without attack
 
 %% PLOT
 
+% Figure 1.1
+
 % --- Data Preparation ---
 tempo = 0:size(residuals, 2)-1; 
 res_planta = residuals(1:p_sys, :);    % r_Sys (Stealthy)
@@ -391,7 +392,7 @@ ylim([-0.01 0.01]);
 legend([p1, p2], {'r_{Sys}_1', 'r_{Sys}_2'}, 'Location', 'best');
 hold off;
 
-%
+% Figure 1.2
 
 subplot(2, 1, 2);
 hold on; grid on;
@@ -418,7 +419,7 @@ legend([p1,p2,p3,p4], {'r_{Sys}_1', 'r_{Sys}_2', 'r_{Aux}_1', 'r_{Aux}_2'}, 'Loc
 
 hold off;
 
-%%
+% Figure 2.1
 
 % Creating the figure with a black outer background
 figure('Name', 'Output Analysis: Real vs Filter', 'Color', 'k');
