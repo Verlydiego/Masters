@@ -1,9 +1,10 @@
-clc; clear; close all;
+clc; clear; %close all;
 
-rng(87)
-%rng(100)
+rng(1952777514)
 
-%% System Matrices:
+%% Parameters
+
+% System Matrices:
 
 A_sys = [0.9843,0.0000,0.0251,0.0000;
          0.0000,0.9892,0.0000,0.0175;
@@ -18,31 +19,43 @@ B_sys = [0.0478,0.0010;
 C_sys = [0.5,0.0,0.0,0.0
          0.0,0.5,0.0,0.0];
 
+% Transition Probability Matrix for modes 1 and 2 only
+P_matrix = [0.77, 0.23; 
+            0.36, 0.64];
+
 
 %% Auxiliary systems:
 
 % number of auxiliary matrices:
 
-n_aux = 2;
+n_aux = 4;
 % The choice between tau_real_A and tau_im_A must satisfy: 
 % n_aux = tau_real_A + 2tau_im_A, based on the number of imaginary
 % eigenvalues of A_sys. In this case there are only real eigenvalues
 tau_real_A = n_aux;
 tau_im_A = 0;
-m_aux = 1;
+% m_aux >= p_aux;
+m_aux = 2;
 p_aux = 2;
-l = 3;
+l = 3; % size(P_matrix) + 1
 theta_u = 1;
 theta_y = 1;
 
-% --- Input Parameters ---
+% --- Parâmetros de Estabilidade ---
 is_stable = false;
 attempt = 1;
-max_attempts = 500;
+max_attempts = 1000;
 tolerance = 1e-6; % Tolerance for strict inequality
 
 % YALMIP settings to use SeDuMi as the solver
 ops = sdpsettings('solver', 'sedumi', 'verbose', 0);
+
+% --- Matrix Dimensions ---
+% Original plant dimensions
+n_sys = size(A_sys, 1); % Number of states
+p_sys = size(C_sys, 1); % Number of outputs (sensors)
+m_sys = size(B_sys, 2); % Number of inputs (actuators)
+
 
 while ~is_stable && attempt <= max_attempts
     % 1. Matrix Generation via Truncated Normal Distribution (TND)
@@ -52,91 +65,76 @@ while ~is_stable && attempt <= max_attempts
      Truncated_Normal_Distribution(A_sys, B_sys, C_sys, tau_real_A, ...
      tau_im_A, n_aux, m_aux, p_aux, theta_u, theta_y, l);
 
-    % 2. Define Decision Variables in YALMIP
-    % sdpvar(n, n) automatically creates a symmetric matrix P
-    P = sdpvar(n_aux, n_aux); 
+    n_total = n_sys + n_aux;
 
-    % 3. Define Constraints (LMIs)
-    % Condition 1: P must be positive definite (P > 0)
-    Constraints = [P >= tolerance * eye(n_aux)];
-    
-    % Condition 2: Common Lyapunov Function for Arbitrary Switching
-    % A_sigma_Aux * P * A_sigma_Aux' - P < 0 must hold for all l modes simultaneously
+    % Montagem temporária de A_comp para o teste
+    A_temp = zeros(n_total, n_total, l);
     for i = 1:l
-        Ai = A_aux_set(:,:,i);
-        Constraints = [Constraints, Ai * P * Ai' - P <= -tolerance * eye(n_aux)];
+        A_temp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
+                         A_coup,              A_aux_set(:,:,i)];
     end
 
-    % 4. Solve the Feasibility Problem
-    sol = optimize(Constraints, [], ops);
+    % 2. CONSTRUÇÃO DA MATRIZ AUMENTADA A1 (Fonte: Eq. 3.12d [cite: 386])
+    % N = diag(A1 ⊗ A1, A2 ⊗ A2, ..., Al ⊗ Al)
+    N_blocks = cell(1, l);
+    for i = 2:l
+        N_blocks{i} = kron(A_temp(:,:,i), A_temp(:,:,i));
+    end
+    N_matrix = blkdiag(N_blocks{:});
+    
+    % C = (P_matrix' ⊗ I_{n_total^2})
+    C_matrix = kron(P_matrix', eye(n_total^2));
+    
+    % Matriz de momentos A1 = C * N
+    A1 = C_matrix * N_matrix;
 
-    % 5. Verify the Results
-    if sol.problem == 0 % 0 indicates that a feasible solution was found
+    % 3. TESTE DO RAIO ESPECTRAL
+    raio_espectral = max(abs(eig(A1)));
+    
+    if raio_espectral < 1
         is_stable = true;
-        fprintf('Success! Stable matrix set found on attempt %d.\n', attempt);
-        P_final = value(P); % Extract the numerical value of P
+        A_comp = A_temp; % Salva o conjunto estável
+        fprintf('Estabilidade MSS garantida na tentativa %d (Raio: %.4f)\n', attempt, raio_espectral);
     else
-        if mod(attempt, 10) == 0
-            fprintf('Attempt %d: No common Lyapunov function found. Retrying...\n', attempt);
-        end
         attempt = attempt + 1;
     end
 end
 
 if ~is_stable
-    error('Could not find a stable matrix set within the maximum number of attempts.');
+    error('Não foi possível encontrar um conjunto MSS estável após %d tentativas.', max_attempts);
 end
 
 
 
 %% Extended Matrices
 
-% --- Matrix Dimensions ---
-% Original plant dimensions
-n_sys = size(A_sys, 1); % Number of states
-p_sys = size(C_sys, 1); % Number of outputs (sensors)
-m_sys = size(B_sys, 2); % Number of inputs (actuators)
-
+    
 % Auxiliary system dimensions
 n_aux = size(A_aux_set, 1); % Number of auxiliary states
 p_aux = size(C_aux, 1);     % Number of auxiliary outputs
 m_aux = size(B_aux, 2);     % Number of auxiliary inputs
-
-% --- Initialization of Extended Matrices ---
-% The state matrix A changes according to the switching signal sigma (l modes)
-A_comp = zeros(n_sys + n_aux, n_sys + n_aux, l);
-
-for i = 1:l
-    % Assembly of the extended A matrix for each mode i
-    % Structure: [ A_sys    0   ]
-    %            [ A_coup   A_i ]
-    A_comp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
-                     zeros(n_aux, n_sys),              A_aux_set(:,:,i)];
-    % A_comp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
-    %                  A_coup,              A_aux_set(:,:,i)];
-end
-
+        
 % --- Constant Extended B and C Matrices ---
 % Note: In this model, B_aux and C_aux are constant across all modes.
-
+    
 % Extended Input Matrix (B_comp)
 % Structure: [ B_sys    0     ]
 %            [ B_coup   B_aux ]
 B_comp = [B_sys,               zeros(n_sys, m_aux);
-          zeros(n_aux, m_sys), B_aux];
+         zeros(n_aux, m_sys), B_aux];
 % B_comp = [B_sys,               zeros(n_sys, m_aux);
 %           B_coup,              B_aux];
-
+    
 % Extended Output Matrix (C_comp)
 % Structure: [ C_sys    0     ]
 %            [ C_coup   C_aux ]
 C_comp = [C_sys,               zeros(p_sys, n_aux);
-          zeros(p_aux, n_sys), C_aux];
+         zeros(p_aux, n_sys), C_aux];
 % C_comp = [C_sys,               zeros(p_sys, n_aux);
 %           C_coup,              C_aux];
-
+    
 fprintf('Extended System matrices (A_comp, B_comp, C_comp) successfully built.\n');
-
+    
 % --- Dimensions ---
 n_total = n_sys + n_aux;
 p_total = p_sys + p_aux;
@@ -148,14 +146,13 @@ p_total = p_sys + p_aux;
 A_att = A_comp(:,:,1);
 B_att = B_comp;
 C_att = C_comp;
-
 % Function calls to calculate the attacker's controller and observer gains
 [Ka1, Ka2] = calculateAttackerController(A_att, B_att, C_att);
 La_set = calculateAttackerObserver(A_att, C_att);
 
 % Malicious reference
 % Can be a step input to cause overflow or depletion
-ra = 0.2 * ones(p_total, 1); 
+ra = 0.8 * ones(p_total, 1); 
 
 % Initialization of the attacker's internal states
 xa = zeros(n_total, 1);     % Covert model state
@@ -180,26 +177,6 @@ x_a    = zeros(n_total, T_sim);    % Internal state of the attacker model
 theta_0 = 1;
 k_markov_start = 3000;    % Start of Markov chain switching
 %k_markov_end = 7000;
-
-% Transition Probability Matrix for modes 1 and 2 only
-P_matrix = [0.77, 0.23; 
-            0.36, 0.64];
-
-% P_matrix = [
-%     0.1238, 0.3142, 0.2419, 0.1978, 0.0516, 0.0515, 0.0192;
-%     0.2057, 0.1428, 0.1682, 0.0049, 0.2303, 0.1977, 0.0504;
-%     0.0719, 0.0725, 0.1203, 0.2075, 0.1708, 0.1151, 0.2419;
-%     0.0507, 0.1061, 0.1331, 0.1656, 0.2852, 0.0725, 0.1868;
-%     0.1744, 0.0137, 0.1789, 0.0502, 0.0191, 0.2794, 0.2843;
-%     0.2738, 0.1032, 0.0331, 0.2318, 0.1491, 0.0413, 0.1677;
-%     0.0106, 0.2804, 0.0798, 0.2043, 0.0961, 0.1603, 0.1685
-% ];
- 
-% P_matrix = [0.999, 0.001; 
-%             0.001, 0.999];
-
-% P_matrix = [0.99, 0.01; 
-%             0.01, 0.99];
             
 % S is the cumulative probability matrix to facilitate sampling 
 S = cumsum(P_matrix, 2);
@@ -287,10 +264,15 @@ for k = 1:T_sim-1
     y_a = zeros(p_sys + p_aux, 1);
     
     if k >=1000 % && k <= 7000
+
+        %ra_ramp = ra * min((k - 1000) / 1000, 1);
+
         % 1. Calculates the attack input signal (ua) using the function gains
-        % u_a(k) = Ka1 * x_estimated_by_attacker + Ka2 * ra [3]
-        u_a = Ka1 * x_hat_a + Ka2 * ra;
-        %u_a = zeros(3,1);
+        u_a_calc = Ka1 * x_hat_a + Ka2 * ra;
+        % u_a_calc = Ka1 * x_hat_a + Ka2 * ra_ramp;
+        %u_a = u_a_calc; % Ataca ambas as plantas
+        u_a(1:m_sys) = u_a_calc(1:m_sys); % Ataca apenas a planta física
+        
         
         % 2. The attacker simulates the effect of the attack on their internal model to generate ya
         % ya(k) is the signal that will be subtracted from the real output to hide the attack
@@ -347,7 +329,10 @@ for k = 1:T_sim-1
     % residuos(:,k) = abs(y_comprometido - y_hat);
     residuals(:,k) = y_compromised - y_hat;
 
-    y_plot(:,k) = y_a;
+    y_real = C_comp*x_real(:,k) + E_comp*vk;
+
+    y_plot(:,k) = y_compromised;
+    y_plot_2(:,k) = y_real;
     y_hat_plot(:,k) = y_hat;
 end
 
@@ -458,3 +443,34 @@ ylabel('$\hat{y}$', 'Interpreter', 'latex', 'Color', 'w');
 legend('$\hat{y}_{sys1}$', '$\hat{y}_{sys2}$', '$\hat{y}_{aux1}$', '$\hat{y}_{aux2}$', ...
        'Location', 'bestoutside', 'Interpreter', 'latex', 'TextColor', 'w', 'EdgeColor', 'w');
 ylim([-0.5 0.5]);
+
+% Figure 3
+figure('Color','k','Name','System Outputs');
+
+hold on; grid on;
+
+plot(y_plot_2(1,1:T_sim-1),'LineWidth',1.5);
+plot(y_plot_2(2,1:T_sim-1),'LineWidth',1.5);
+plot(y_plot_2(3,1:T_sim-1),'LineWidth',1.5);
+plot(y_plot_2(4,1:T_sim-1),'LineWidth',1.5);
+
+xline(1000,'--k','Attack Start','LabelVerticalAlignment','top');
+xline(3000,':r','Mode Switch','LabelVerticalAlignment','middle');
+
+set(gca,...
+    'Color','k',...
+    'XColor','w',...
+    'YColor','w',...
+    'GridColor',[0.5 0.5 0.5]);
+
+title('Real System Outputs','Color','w');
+ylabel('y_{real}','Color','w');
+
+legend({'y_{sys,1}','y_{sys,2}','y_{aux,1}','y_{aux,2}'},...
+       'Location','bestoutside',...
+       'TextColor','w',...
+       'EdgeColor','w');
+
+xlim([0 T_sim]);
+
+hold off;

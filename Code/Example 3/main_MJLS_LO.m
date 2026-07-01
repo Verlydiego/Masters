@@ -47,10 +47,12 @@ ops = sdpsettings('solver', 'sedumi', 'verbose', 0);
 while ~is_stable && attempt <= max_attempts
     % 1. Matrix Generation via Truncated Normal Distribution (TND)
     % This function should return the set of l state matrices for the auxiliary system
-    [A_coup, B_coup, C_coup, A_aux_set, B_aux, C_aux, ...
-     Q_red_y, Q_red_u, Q_exp1_y, Q_exp2_y, Q_exp_u] = ...
-     Truncated_Normal_Distribution(A_sys, B_sys, C_sys, tau_real_A, ...
-     tau_im_A, n_aux, m_aux, p_aux, theta_u, theta_y, l);
+    for i = 1:l
+        [A_coup(:,:,i), B_coup(:,:,i), C_coup(:,:,i), A_aux(:,:,i), B_aux(:,:,i), C_aux(:,:,i), ...
+         Q_red_y, Q_red_u, Q_exp1_y, Q_exp2_y, Q_exp_u] = ...
+         Truncated_Normal_Distribution(A_sys, B_sys, C_sys, tau_real_A, ...
+         tau_im_A, n_aux, m_aux, p_aux, theta_u, theta_y);
+    end
 
     % 2. Define Decision Variables in YALMIP
     % sdpvar(n, n) automatically creates a symmetric matrix P
@@ -63,7 +65,7 @@ while ~is_stable && attempt <= max_attempts
     % Condition 2: Common Lyapunov Function for Arbitrary Switching
     % A_sigma_Aux * P * A_sigma_Aux' - P < 0 must hold for all l modes simultaneously
     for i = 1:l
-        Ai = A_aux_set(:,:,i);
+        Ai = A_aux(:,:,i);
         Constraints = [Constraints, Ai * P * Ai' - P <= -tolerance * eye(n_aux)];
     end
 
@@ -98,13 +100,11 @@ p_sys = size(C_sys, 1); % Number of outputs (sensors)
 m_sys = size(B_sys, 2); % Number of inputs (actuators)
 
 % Auxiliary system dimensions
-n_aux = size(A_aux_set, 1); % Number of auxiliary states
-p_aux = size(C_aux, 1);     % Number of auxiliary outputs
-m_aux = size(B_aux, 2);     % Number of auxiliary inputs
+n_aux = size(A_aux(:,:,1), 1); % Number of auxiliary states
+p_aux = size(C_aux(:,:,1), 1);     % Number of auxiliary outputs
+m_aux = size(B_aux(:,:,1), 2);     % Number of auxiliary inputs
 
 % --- Initialization of Extended Matrices ---
-% The state matrix A changes according to the switching signal sigma (l modes)
-A_comp = zeros(n_sys + n_aux, n_sys + n_aux, l);
 
 for i = 1:l
     % Assembly of the extended A matrix for each mode i
@@ -113,41 +113,84 @@ for i = 1:l
     % A_comp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
     %                  zeros(n_aux, n_sys),              A_aux_set(:,:,i)];
     A_comp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
-                     A_coup,              A_aux_set(:,:,i)];
+                     A_coup(:,:,i),              A_aux(:,:,i)];
+
+    % --- Constant Extended B and C Matrices ---
+    % Note: In this model, B_aux and C_aux are constant across all modes.
+    
+    % Extended Input Matrix (B_comp)
+    % Structure: [ B_sys    0     ]
+    %            [ B_coup   B_aux ]
+    B_comp(:,:,i) = [B_sys,               zeros(n_sys, m_aux);
+                     zeros(n_aux, m_sys), B_aux(:,:,i)];
+    % B_comp(:,:,i) = [B_sys,               zeros(n_sys, m_aux);
+    %           B_coup(:,:,i),              B_aux(:,:,i)];
+    
+    % Extended Output Matrix (C_comp)
+    % Structure: [ C_sys    0     ]
+    %            [ C_coup   C_aux ]
+    C_comp(:,:,i) = [C_sys,               zeros(p_sys, n_aux);
+                     zeros(p_aux, n_sys), C_aux(:,:,i)];
+    % C_comp(:,:,i) = [C_sys,               zeros(p_sys, n_aux);
+    %           C_coup(:,:,i),              C_aux(:,:,i)];
+
 end
 
-% --- Constant Extended B and C Matrices ---
-% Note: In this model, B_aux and C_aux are constant across all modes.
-
-% Extended Input Matrix (B_comp)
-% Structure: [ B_sys    0     ]
-%            [ B_coup   B_aux ]
-B_comp = [B_sys,               zeros(n_sys, m_aux);
-          zeros(n_aux, m_sys), B_aux];
-% B_comp = [B_sys,               zeros(n_sys, m_aux);
-%           B_coup,              B_aux];
-
-% Extended Output Matrix (C_comp)
-% Structure: [ C_sys    0     ]
-%            [ C_coup   C_aux ]
-C_comp = [C_sys,               zeros(p_sys, n_aux);
-          zeros(p_aux, n_sys), C_aux];
-% C_comp = [C_sys,               zeros(p_sys, n_aux);
-%           C_coup,              C_aux];
-
 fprintf('Extended System matrices (A_comp, B_comp, C_comp) successfully built.\n');
+
+%% Luenberger Observer
 
 % --- Dimensions ---
 n_total = n_sys + n_aux;
 p_total = p_sys + p_aux;
+tolerance = 1e-6;
+
+% --- Decision Variables ---
+P = sdpvar(n_total, n_total); % Symmetric matrix P > 0
+R = sdpvar(n_total, p_total, l); % R_sigma for each mode
+
+% --- Constraints ---
+Constraints = [P >= tolerance * eye(n_total)];
+
+for i = 1:l
+    Ai = A_comp(:,:,i);
+    Ri = R(:,:,i);
+    Ci = C_comp(:,:,i); % C is constant in this model
+    
+    % The core term of the LMI: (P*Ai - Ri*Ci)
+    Term = P*Ai - Ri*Ci;
+    
+    % Building the LMI:
+    % [ P      Term ]
+    % [ Term'   P   ]  > 0
+    LMI = [P, Term; Term', P];
+    Constraints = [Constraints, LMI >= tolerance * eye(2*n_total)];
+end
+
+% --- Solve with SeDuMi ---
+ops = sdpsettings('solver', 'sedumi', 'verbose', 0);
+sol = optimize(Constraints, [], ops);
+
+if sol.problem == 0
+    % --- Extract Gains L_sigma ---
+    P_val = value(P);
+    L_set = zeros(n_total, p_total, l);
+    for i = 1:l
+        Ri_val = value(R(:,:,i));
+        L_set(:,:,i) = P_val \ Ri_val; % L = P^-1 * R
+    end
+    fprintf('Observer gains L calculated successfully.\n');
+else
+    error('Could not find a feasible set of observer gains. Check observability.');
+end
 
 %%
 
 % --- Attacker Definitions ---
 % The attacker assumes perfect knowledge of the first mode
 A_att = A_comp(:,:,1);
-B_att = B_comp;
-C_att = C_comp;
+B_att = B_comp(:,:,1);
+C_att = C_comp(:,:,1);
 
 % Function calls to calculate the attacker's controller and observer gains
 [Ka1, Ka2] = calculateAttackerController(A_att, B_att, C_att);
@@ -155,38 +198,41 @@ La_set = calculateAttackerObserver(A_att, C_att);
 
 % Malicious reference
 % Can be a step input to cause overflow or depletion
-ra = 0.8 * ones(p_total, 1); 
+ra = 0.2 * ones(p_sys + p_aux, 1); 
 
 % Initialization of the attacker's internal states
-xa = zeros(n_total, 1);     % Covert model state
-x_hat_a = zeros(n_total, 1); % Attacker's estimate via their own Kalman Filter
+xa = zeros(n_sys + n_aux, 1);     % Covert model state
+x_hat_a = zeros(n_sys + n_aux, 1); % Attacker's estimate via their own Kalman Filter
 
 %%
 
 % --- Time Parameters ---
 T_sim = 10000; % Simulation horizon
+n_total = n_sys + n_aux; % Dimension of the extended system
 
 % --- State Initialization ---
 x_real = zeros(n_total, T_sim);    % Real state of the extended system
 x_hat  = zeros(n_total, T_sim);    % Estimated state by the observer
 x_a    = zeros(n_total, T_sim);    % Internal state of the attacker model
 
+
 %% Markov Chain Generation
 
 theta_0 = 1;
 k_markov_start = 3000;    % Start of Markov chain switching
+k_markov_end = 7000;
 
 % Transition Probability Matrix for modes 1 and 2 only
 P_matrix = [0.77, 0.23; 
             0.36, 0.64];
             
-% S is the cumulative probability matrix to facilitate sampling 
+% S is the cumulative probability matrix to facilitate sampling
 S = cumsum(P_matrix, 2);
 
 theta = zeros(1, T_sim);
 theta(1:k_markov_start-1) = theta_0; 
 
-modo_atual = 2; % We start in mode 1 after mode 3
+modo_atual = 2; % We start in mode 3 (here is 2 but it receives a +1) after mode 1
 
 for k = k_markov_start:T_sim
 
@@ -206,15 +252,14 @@ end
 % --- Definition of Inputs (u_sys and u_aux) ---
 % Original plant: step and sine wave. Auxiliary: step.
 u_nominal = zeros(m_sys + m_aux, T_sim);
+%u_nominal(1:m_sys, :) = 0.5 * repmat([1; 0], 1, T_sim); % Step input for the original plant
+%u_nominal(m_sys+1:end, :) = 0.5 * sin(0.01 * (1:T_sim)); % Sine wave for the auxiliary system
+% (Fill in here with your nominal control signals)
 
 % --- Noise Parameters ---
 a_noise = 1e-4;
 D_comp = a_noise * 0.5 * eye(n_total); % Process noise coupling
 E_comp = a_noise * 0.5 * eye(p_total); % Measurement noise coupling
-
-Q_comp = D_comp * D_comp';
-R_comp = E_comp * E_comp';
-P_cov = 0.1 * eye(n_total);     % P_0|-1 (Initial covariance matrix)
 
 for k = 1:T_sim-1
     i = theta(k); % Identifies the active mode at the current time instant
@@ -229,7 +274,8 @@ for k = 1:T_sim-1
     u_a = zeros(m_sys + m_aux, 1);
     y_a = zeros(p_sys + p_aux, 1);
     
-    if k >=1000  % && k <= 7000
+    if k >=1000 % && k <= 7000
+        %ra_ramp = ra * min((k - 1000) / 1000, 1); 
         % 1. Calculates the attack input signal (ua) using the function gains
         u_a_calc = Ka1 * x_hat_a + Ka2 * ra;
         %u_a = u_a_calc; % Ataca ambas as plantas
@@ -245,7 +291,7 @@ for k = 1:T_sim-1
         % 4. The attacker updates their estimate of the real state (x_hat_a)
         % (Simulates an internal Kalman Filter of the hacker)
         % Note: y_real_k is obtained from the previous step or from the plant
-        y_real_atual = C_comp * x_real(:,k) + E_comp * vk; % Reading intercepted by the hacker
+        y_real_atual = C_comp(:,:,i) * x_real(:,k) + E_comp * vk; % Reading intercepted by the hacker
         x_hat_a = A_att * x_hat_a + B_att * (u_nominal(:,k) + u_a) + ...
                   La_set * (y_real_atual - C_att * x_hat_a);
     end
@@ -253,40 +299,27 @@ for k = 1:T_sim-1
     % STEP B: Real System Dynamics
     % The physical system receives the nominal control + the attack
     u_total = u_nominal(:,k) + u_a;
-    x_real(:, k+1) = A_comp(:,:,i)*x_real(:,k) + B_comp*u_total + D_comp*wk;
+    x_real(:, k+1) = A_comp(:,:,i)*x_real(:,k) + B_comp(:,:,i)*u_total + D_comp*wk;
 
     % STEP C: Compromised Measurements
     % What the controller and observer receive is y(k) subtracted by ya(k)
-    y_compromised = (C_comp * x_real(:,k) + E_comp * vk) - y_a;
+    y_compromised = (C_comp(:,:,i) * x_real(:,k) + E_comp * vk) - y_a;
 
-    %%
+    % STEP D: Switched Luenberger Observer
+    % The observer uses the same sigma(k) signal and corresponding L_i gain
+    L_atual = L_set(:,:,i);
+    y_hat = C_comp(:,:,i) * x_hat(:,k);
 
-    % --- STEP D: Kalman Filter for MJLS (Algorithm 2.2) ---
-    % D.1 Filtering Stage
-
-    S_k = R_comp + C_comp * P_cov * C_comp'; 
-    K_kalman = (P_cov * C_comp') / S_k; 
-
-    % D.2 Calculation of Residual d_aux,k BEFORE the k+1 update (Eq. 14 / 4.10)
-    % d_aux = y_star_auxiliary - y_hat_auxiliary (Innovation of the 2nd line)
-
-    y_hat = C_comp * x_hat(:,k);
-
-    % D.3 Update and Prediction for k+1
-    x_hat_filter = x_hat(:,k) + K_kalman * (y_compromised - C_comp * x_hat(:,k));
-    P_filter = P_cov - K_kalman * C_comp * P_cov;
-
-    x_hat(:, k+1) = A_comp(:,:,i) * x_hat_filter + B_comp * u_nominal(:,k);
-    P_cov = Q_comp + A_comp(:,:,i) * P_filter * A_comp(:,:,i)';
-
-    %%
+    % Estimated state update
+    x_hat(:, k+1) = A_comp(:,:,i)*x_hat(:,k) + B_comp(:,:,i)*u_nominal(:,k) + ...
+                    L_atual * (y_compromised - y_hat);
     
     % STEP E: Residual Calculation
     % r_aux is the part of the residual related to the auxiliary system
     % residuos(:,k) = abs(y_comprometido - y_hat);
     residuals(:,k) = y_compromised - y_hat;
 
-    y_real = C_comp*x_real(:,k) + E_comp*vk;
+    y_real = C_comp(:,:,i)*x_real(:,k) + E_comp*vk;
     
     y_plot(:,k) = y_compromised;
     y_plot_2(:,k) = y_real;
@@ -392,7 +425,7 @@ grid on;
 % Adjusting axis colors and inner background to black
 set(gca, 'Color', 'k', 'XColor', 'w', 'YColor', 'w', 'GridColor', [0.5 0.5 0.5]);
 
-title('Kalman Filter Estimates ($\hat{y}$)', 'Interpreter', 'latex', 'Color', 'w');
+title('Luenberger Observer ($\hat{y}$)', 'Interpreter', 'latex', 'Color', 'w');
 xlabel('k', 'Color', 'w');
 ylabel('$\hat{y}$', 'Interpreter', 'latex', 'Color', 'w');
 

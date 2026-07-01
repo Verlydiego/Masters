@@ -1,6 +1,6 @@
-clc; clear; %close all;
+clc; clear; close all;
 
-rng(87)
+rng(1952777514)
 
 %% System Matrices:
 
@@ -22,15 +22,16 @@ C_sys = [0.5,0.0,0.0,0.0
 
 % number of auxiliary matrices:
 
-n_aux = 2;
+n_aux = 4;
 % The choice between tau_real_A and tau_im_A must satisfy: 
 % n_aux = tau_real_A + 2tau_im_A, based on the number of imaginary
 % eigenvalues of A_sys. In this case there are only real eigenvalues
 tau_real_A = n_aux;
 tau_im_A = 0;
-m_aux = 1;
+% m_aux >= p_aux;
+m_aux = 2;
 p_aux = 2;
-l = 3;
+l = 3; % size(P_matrix) + 1
 theta_u = 1;
 theta_y = 1;
 
@@ -122,13 +123,17 @@ end
 % Structure: [ B_sys    0     ]
 %            [ B_coup   B_aux ]
 B_comp = [B_sys,               zeros(n_sys, m_aux);
-          B_coup,              B_aux];
+         zeros(n_aux, m_sys), B_aux];
+% B_comp = [B_sys,               zeros(n_sys, m_aux);
+%           B_coup,              B_aux];
 
 % Extended Output Matrix (C_comp)
 % Structure: [ C_sys    0     ]
 %            [ C_coup   C_aux ]
 C_comp = [C_sys,               zeros(p_sys, n_aux);
-          C_coup,              C_aux];
+         zeros(p_aux, n_sys), C_aux];
+% C_comp = [C_sys,               zeros(p_sys, n_aux);
+%           C_coup,              C_aux];
 
 fprintf('Extended System matrices (A_comp, B_comp, C_comp) successfully built.\n');
 
@@ -192,7 +197,7 @@ La_set = calculateAttackerObserver(A_att, C_att);
 
 % Malicious reference
 % Can be a step input to cause overflow or depletion
-ra = 0.2 * ones(p_sys + p_aux, 1); 
+ra = 0.8 * ones(p_sys + p_aux, 1); 
 
 % Initialization of the attacker's internal states
 xa = zeros(n_sys + n_aux, 1);     % Covert model state
@@ -219,12 +224,6 @@ k_markov_end = 7000;
 % Transition Probability Matrix for modes 1 and 2 only
 P_matrix = [0.77, 0.23; 
             0.36, 0.64];
-
-% P_matrix = [0.999, 0.001; 
-%             0.001, 0.999];
-
-% P_matrix = [0.99, 0.01; 
-%             0.01, 0.99];
             
 % S is the cumulative probability matrix to facilitate sampling
 S = cumsum(P_matrix, 2);
@@ -257,9 +256,9 @@ u_nominal = zeros(m_sys + m_aux, T_sim);
 % (Fill in here with your nominal control signals)
 
 % --- Noise Parameters ---
-a_noise = 1e-6;
-D_comp = a_noise * eye(n_total); % Process noise coupling
-E_comp = a_noise * eye(p_total); % Measurement noise coupling
+a_noise = 1e-4;
+D_comp = a_noise * 0.5 * eye(n_total); % Process noise coupling
+E_comp = a_noise * 0.5 * eye(p_total); % Measurement noise coupling
 
 for k = 1:T_sim-1
     i = theta(k); % Identifies the active mode at the current time instant
@@ -276,8 +275,9 @@ for k = 1:T_sim-1
     
     if k >=1000 % && k <= 7000
         % 1. Calculates the attack input signal (ua) using the function gains
-        % u_a(k) = Ka1 * x_estimated_by_attacker + Ka2 * ra [3]
-        u_a = Ka1 * x_hat_a + Ka2 * ra;
+        u_a_calc = Ka1 * x_hat_a + Ka2 * ra;
+        %u_a = u_a_calc; % Ataca ambas as plantas
+        u_a(1:m_sys) = u_a_calc(1:m_sys); % Ataca apenas a planta física
         
         % 2. The attacker simulates the effect of the attack on their internal model to generate ya
         % ya(k) is the signal that will be subtracted from the real output to hide the attack
@@ -289,11 +289,6 @@ for k = 1:T_sim-1
         % 4. The attacker updates their estimate of the real state (x_hat_a)
         % (Simulates an internal Kalman Filter of the hacker)
         % Note: y_real_k is obtained from the previous step or from the plant
-        y_real_atual = C_comp * x_real(:,k) + E_comp * vk; % Reading intercepted by the hacker
-        x_hat_a = A_att * x_hat_a + B_att * (u_nominal(:,k) + u_a) + ...
-                  La_set * (y_real_atual - C_att * x_hat_a);
-
-    else
         y_real_atual = C_comp * x_real(:,k) + E_comp * vk; % Reading intercepted by the hacker
         x_hat_a = A_att * x_hat_a + B_att * (u_nominal(:,k) + u_a) + ...
                   La_set * (y_real_atual - C_att * x_hat_a);
@@ -312,7 +307,7 @@ for k = 1:T_sim-1
     % The observer uses the same sigma(k) signal and corresponding L_i gain
     L_atual = L_set(:,:,i);
     y_hat = C_comp * x_hat(:,k);
-    
+
     % Estimated state update
     x_hat(:, k+1) = A_comp(:,:,i)*x_hat(:,k) + B_comp*u_nominal(:,k) + ...
                     L_atual * (y_compromised - y_hat);
@@ -322,7 +317,10 @@ for k = 1:T_sim-1
     % residuos(:,k) = abs(y_comprometido - y_hat);
     residuals(:,k) = y_compromised - y_hat;
 
-    y_plot(:,k) = y_a;
+    y_real = C_comp*x_real(:,k) + E_comp*vk;
+    
+    y_plot(:,k) = y_compromised;
+    y_plot_2(:,k) = y_real;
     y_hat_plot(:,k) = y_hat;
 end
 
@@ -407,17 +405,16 @@ grid on;
 % Adjusting axis colors and inner background to black
 set(gca, 'Color', 'k', 'XColor', 'w', 'YColor', 'w', 'GridColor', [0.5 0.5 0.5]); 
 
-title('Real System Outputs (Plant + Auxiliary)', 'Interpreter', 'tex', 'Color', 'w');
+title('Masked Outputs (Plant + Auxiliary)', 'Interpreter', 'tex', 'Color', 'w');
 xlabel('k', 'Color', 'w');
 ylabel('y_{real}', 'Interpreter', 'tex', 'Color', 'w');
 
 % Adjusting the legend to a black background and white text
 legend('y_{sys1}', 'y_{sys2}', 'y_{aux1}', 'y_{aux2}', ...
        'Location', 'bestoutside', 'TextColor', 'w', 'EdgeColor', 'w');
-ylim([-0.5 0.5]);
+ylim([-0.5 1]);
 
 % Figure 2.2
-
 % --- Subplot 2: Kalman Filter Estimates ---
 subplot(2, 1, 2);
 plot(y_hat_plot(1:4, 1:T_sim-1)', 'LineWidth', 1.5);
@@ -426,11 +423,43 @@ grid on;
 % Adjusting axis colors and inner background to black
 set(gca, 'Color', 'k', 'XColor', 'w', 'YColor', 'w', 'GridColor', [0.5 0.5 0.5]);
 
-title('Luenberger Observer Estimates ($\hat{y}$)', 'Interpreter', 'latex', 'Color', 'w');
+title('Luenberger Observer ($\hat{y}$)', 'Interpreter', 'latex', 'Color', 'w');
 xlabel('k', 'Color', 'w');
 ylabel('$\hat{y}$', 'Interpreter', 'latex', 'Color', 'w');
 
 % Adjusting the legend to a black background and white text
 legend('$\hat{y}_{sys1}$', '$\hat{y}_{sys2}$', '$\hat{y}_{aux1}$', '$\hat{y}_{aux2}$', ...
        'Location', 'bestoutside', 'Interpreter', 'latex', 'TextColor', 'w', 'EdgeColor', 'w');
-ylim([-0.5 0.5]);
+ylim([-0.5 1]);
+
+% Figure 3
+figure('Color','k','Name','System Outputs');
+
+hold on; grid on;
+
+plot(y_plot_2(1,1:T_sim-1),'LineWidth',1.5);
+plot(y_plot_2(2,1:T_sim-1),'LineWidth',1.5);
+plot(y_plot_2(3,1:T_sim-1),'LineWidth',1.5);
+plot(y_plot_2(4,1:T_sim-1),'LineWidth',1.5);
+
+xline(1000,'--k','Attack Start','LabelVerticalAlignment','top');
+xline(3000,':r','Mode Switch','LabelVerticalAlignment','middle');
+
+set(gca,...
+    'Color','k',...
+    'XColor','w',...
+    'YColor','w',...
+    'GridColor',[0.5 0.5 0.5]);
+
+title('Real System Outputs','Color','w');
+ylabel('y_{real}','Color','w');
+
+legend({'y_{sys,1}','y_{sys,2}','y_{aux,1}','y_{aux,2}'},...
+       'Location','bestoutside',...
+       'TextColor','w',...
+       'EdgeColor','w');
+
+xlim([0 T_sim]);
+
+hold off;
+

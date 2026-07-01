@@ -1,7 +1,6 @@
 clc; clear; close all;
 
-rng(87)
-%rng(100)
+rng(1952777514)
 
 %% System Matrices:
 
@@ -23,15 +22,16 @@ C_sys = [0.5,0.0,0.0,0.0
 
 % number of auxiliary matrices:
 
-n_aux = 2;
+n_aux = 4;
 % The choice between tau_real_A and tau_im_A must satisfy: 
 % n_aux = tau_real_A + 2tau_im_A, based on the number of imaginary
 % eigenvalues of A_sys. In this case there are only real eigenvalues
 tau_real_A = n_aux;
 tau_im_A = 0;
-m_aux = 1;
+% m_aux >= p_aux;
+m_aux = 2;
 p_aux = 2;
-l = 8;
+l = 3; % size(P_matrix) + 1
 theta_u = 1;
 theta_y = 1;
 
@@ -47,10 +47,12 @@ ops = sdpsettings('solver', 'sedumi', 'verbose', 0);
 while ~is_stable && attempt <= max_attempts
     % 1. Matrix Generation via Truncated Normal Distribution (TND)
     % This function should return the set of l state matrices for the auxiliary system
-    [A_coup, B_coup, C_coup, A_aux_set, B_aux, C_aux, ...
-     Q_red_y, Q_red_u, Q_exp1_y, Q_exp2_y, Q_exp_u] = ...
-     Truncated_Normal_Distribution(A_sys, B_sys, C_sys, tau_real_A, ...
-     tau_im_A, n_aux, m_aux, p_aux, theta_u, theta_y, l);
+    for i = 1:l
+        [A_coup(:,:,i), B_coup(:,:,i), C_coup(:,:,i), A_aux(:,:,i), B_aux(:,:,i), C_aux(:,:,i), ...
+         Q_red_y, Q_red_u, Q_exp1_y, Q_exp2_y, Q_exp_u] = ...
+         Truncated_Normal_Distribution(A_sys, B_sys, C_sys, tau_real_A, ...
+         tau_im_A, n_aux, m_aux, p_aux, theta_u, theta_y);
+    end
 
     % 2. Define Decision Variables in YALMIP
     % sdpvar(n, n) automatically creates a symmetric matrix P
@@ -63,7 +65,7 @@ while ~is_stable && attempt <= max_attempts
     % Condition 2: Common Lyapunov Function for Arbitrary Switching
     % A_sigma_Aux * P * A_sigma_Aux' - P < 0 must hold for all l modes simultaneously
     for i = 1:l
-        Ai = A_aux_set(:,:,i);
+        Ai = A_aux(:,:,i);
         Constraints = [Constraints, Ai * P * Ai' - P <= -tolerance * eye(n_aux)];
     end
 
@@ -98,13 +100,11 @@ p_sys = size(C_sys, 1); % Number of outputs (sensors)
 m_sys = size(B_sys, 2); % Number of inputs (actuators)
 
 % Auxiliary system dimensions
-n_aux = size(A_aux_set, 1); % Number of auxiliary states
-p_aux = size(C_aux, 1);     % Number of auxiliary outputs
-m_aux = size(B_aux, 2);     % Number of auxiliary inputs
+n_aux = size(A_aux(:,:,1), 1); % Number of auxiliary states
+p_aux = size(C_aux(:,:,1), 1);     % Number of auxiliary outputs
+m_aux = size(B_aux(:,:,1), 2);     % Number of auxiliary inputs
 
 % --- Initialization of Extended Matrices ---
-% The state matrix A changes according to the switching signal sigma (l modes)
-A_comp = zeros(n_sys + n_aux, n_sys + n_aux, l);
 
 for i = 1:l
     % Assembly of the extended A matrix for each mode i
@@ -113,27 +113,28 @@ for i = 1:l
     % A_comp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
     %                  zeros(n_aux, n_sys),              A_aux_set(:,:,i)];
     A_comp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
-                     A_coup,              A_aux_set(:,:,i)];
+                     A_coup(:,:,i),              A_aux(:,:,i)];
+
+    % --- Constant Extended B and C Matrices ---
+    % Note: In this model, B_aux and C_aux are constant across all modes.
+    
+    % Extended Input Matrix (B_comp)
+    % Structure: [ B_sys    0     ]
+    %            [ B_coup   B_aux ]
+    B_comp(:,:,i) = [B_sys,               zeros(n_sys, m_aux);
+                     zeros(n_aux, m_sys), B_aux(:,:,i)];
+    % B_comp(:,:,i) = [B_sys,               zeros(n_sys, m_aux);
+    %                  B_coup(:,:,i),              B_aux(:,:,i)];
+    
+    % Extended Output Matrix (C_comp)
+    % Structure: [ C_sys    0     ]
+    %            [ C_coup   C_aux ]
+    C_comp(:,:,i) = [C_sys,               zeros(p_sys, n_aux);
+              zeros(p_aux, n_sys), C_aux(:,:,i)];
+    % C_comp(:,:,i) = [C_sys,               zeros(p_sys, n_aux);
+    %                  C_coup(:,:,i),              C_aux(:,:,i)];
+
 end
-
-% --- Constant Extended B and C Matrices ---
-% Note: In this model, B_aux and C_aux are constant across all modes.
-
-% Extended Input Matrix (B_comp)
-% Structure: [ B_sys    0     ]
-%            [ B_coup   B_aux ]
-B_comp = [B_sys,               zeros(n_sys, m_aux);
-          zeros(n_aux, m_sys), B_aux];
-% B_comp = [B_sys,               zeros(n_sys, m_aux);
-%           B_coup,              B_aux];
-
-% Extended Output Matrix (C_comp)
-% Structure: [ C_sys    0     ]
-%            [ C_coup   C_aux ]
-C_comp = [C_sys,               zeros(p_sys, n_aux);
-          zeros(p_aux, n_sys), C_aux];
-% C_comp = [C_sys,               zeros(p_sys, n_aux);
-%           C_coup,              C_aux];
 
 fprintf('Extended System matrices (A_comp, B_comp, C_comp) successfully built.\n');
 
@@ -146,12 +147,12 @@ p_total = p_sys + p_aux;
 % --- Attacker Definitions ---
 % The attacker assumes perfect knowledge of the first mode
 A_att = A_comp(:,:,1);
-B_att = B_comp;
-C_att = C_comp;
+B_att = B_comp(:,:,1);
+C_att = C_comp(:,:,1);
 
 % Function calls to calculate the attacker's controller and observer gains
-%[Ka1, Ka2] = calculateAttackerController(A_att, B_att, C_att);
-%La_set = calculateAttackerObserver(A_att, C_att);
+[Ka1, Ka2] = calculateAttackerController(A_att, B_att, C_att);
+La_set = calculateAttackerObserver(A_att, C_att);
 
 % Malicious reference
 % Can be a step input to cause overflow or depletion
@@ -171,43 +172,22 @@ x_real = zeros(n_total, T_sim);    % Real state of the extended system
 x_hat  = zeros(n_total, T_sim);    % Estimated state by the observer
 x_a    = zeros(n_total, T_sim);    % Internal state of the attacker model
 
-% x_a(:,1) = 0.5*ones(n_total,1);
-% x_real(:,1) = 0.5*ones(n_total,1);
-% x_hat(:,1) = 0.5*ones(n_total,1);
-
 %% Markov Chain Generation
 
 theta_0 = 1;
 k_markov_start = 3000;    % Start of Markov chain switching
-%k_markov_end = 7000;
 
 % Transition Probability Matrix for modes 1 and 2 only
-% P_matrix = [0.77, 0.23; 
-%             0.36, 0.64];
-
-P_matrix = [
-    0.1238, 0.3142, 0.2419, 0.1978, 0.0516, 0.0515, 0.0192;
-    0.2057, 0.1428, 0.1682, 0.0049, 0.2303, 0.1977, 0.0504;
-    0.0719, 0.0725, 0.1203, 0.2075, 0.1708, 0.1151, 0.2419;
-    0.0507, 0.1061, 0.1331, 0.1656, 0.2852, 0.0725, 0.1868;
-    0.1744, 0.0137, 0.1789, 0.0502, 0.0191, 0.2794, 0.2843;
-    0.2738, 0.1032, 0.0331, 0.2318, 0.1491, 0.0413, 0.1677;
-    0.0106, 0.2804, 0.0798, 0.2043, 0.0961, 0.1603, 0.1685
-];
- 
-% P_matrix = [0.999, 0.001; 
-%             0.001, 0.999];
-
-% P_matrix = [0.99, 0.01; 
-%             0.01, 0.99];
+P_matrix = [0.77, 0.23; 
+            0.36, 0.64];
             
 % S is the cumulative probability matrix to facilitate sampling 
 S = cumsum(P_matrix, 2);
-num_modes = size(P_matrix,2);
+
 theta = zeros(1, T_sim);
 theta(1:k_markov_start-1) = theta_0; 
 
-modo_atual = 1; % We start in indice 1 of the probability transition matrix
+modo_atual = 2; % We start in mode 1 after mode 3
 
 for k = k_markov_start:T_sim
 
@@ -215,7 +195,11 @@ for k = k_markov_start:T_sim
     
     if k < T_sim
         R_k = rand();
-        modo_atual = find(R_k <= S(modo_atual, :), 1, 'first');
+        if R_k <= S(modo_atual, 1)
+            modo_atual = 1;
+        else
+            modo_atual = 2;
+        end
     end
 end
 
@@ -233,135 +217,69 @@ Q_comp = D_comp * D_comp';
 R_comp = E_comp * E_comp';
 P_cov = 0.1 * eye(n_total);     % P_0|-1 (Initial covariance matrix)
 
-%%
-% --- Parâmetros para o Cálculo Recursivo do K_set (LQR) ---
-Q_lqr = eye(n_total);            % Peso nos estados [cite: 109]
-R_lqr = eye(m_sys + m_aux);      % Peso no controle [cite: 109]
-P_riccati = zeros(n_total, n_total, l); % Matrizes de Riccati para cada modo
-for i = 1:l
-    P_riccati(:,:,i) = eye(n_total); % Inicialização
-end
-K_set = zeros(m_sys + m_aux, n_total, l); % Ganhos de controle
-
-%%
-theta_2 = 1;
-
 for k = 1:T_sim-1
-    %%
     i = theta(k); % Identifies the active mode at the current time instant
-
-    if k >= k_markov_start
-        a = rand;
-        b = rand;
-        P_matrix = [a, 1-a; 
-                    1-b, b];
-        P_save(:,:,k) = P_matrix; 
-        S = cumsum(P_matrix, 2);
-        R_k = rand();
-        theta_2 = find(R_k <= S(theta_2, :), 1, 'first');
-    end
-    i_2 = theta_2;
-
-    %%
 
     % --- Generation of Gaussian Noise (Zero mean) ---
     wk = 1*randn(n_total, 1); % Process disturbance
     vk = 1*randn(p_total, 1); % Measurement noise
-
-    %% Recursive Controller
-
-    % 1. RECURSIVE CALCULATION OF THE K_set GAIN (Coupled Riccati Equations)
-
-    % Calculates Psi for the current mode (Weighted sum by transition probabilities)
-    Psi_i = zeros(n_total, n_total);
-    for j = 1:l
-        % If your P_matrix is 2x2 for auxiliary modes, adjust the indices
-        % Here we use i and j to represent the probability p_ij
-        if i_2 <= size(P_matrix, 1) && j <= size(P_matrix, 2)
-            Psi_i = Psi_i + P_riccati(:,:,j) * P_matrix(i_2, j);
-        end
-    end
-
-    % Updates the K_set Gain for the current mode i
-    % Equation: K_i = -(R + B'*Psi*B)^-1 * B'*Psi*A
-    Ai = A_comp(:,:,i_2);
-    Bi = B_comp;
-    K_set(:,:,i_2) = -(R_lqr + Bi' * Psi_i * Bi) \ (Bi' * Psi_i * Ai);
-
-    % Updates the Riccati Matrix for the next step k+1
-    P_riccati(:,:,i_2) = Ai' * (Psi_i - Psi_i * Bi * ((R_lqr + Bi' * Psi_i * Bi) \ (Bi' * Psi_i))) * Ai + Q_lqr;
-
-    % 2. NOMINAL CONTROL (Recursive Closed-Loop)
-    % u_nominal = K * corrected x_hat (using the gain calculated above)
-    u_nominal(:,k) = K_set(:,:,i_2) * x_hat(:,k);
-
-    %%
     
     % STEP A: Attacker Logic
     % The attacker injects ua(k) and tries to compensate with ya(k)
     % In this example, ua starts at k=1000 and is a ramp limited to 0.5
     u_a = zeros(m_sys + m_aux, 1);
     y_a = zeros(p_sys + p_aux, 1);
-
-    [La_set,~, ~, ~] = dlqe(A_comp(:,:,i_2), eye(n_total), C_att, Q_comp, R_comp);
     
-    if k >=1000 % && k <= 7000
+    if k >=1000  % && k <= 7000
+        %ra_ramp = ra * min((k - 1000) / 1000, 1); 
         % 1. Calculates the attack input signal (ua) using the function gains
-        % u_a(k) = Ka1 * x_estimated_by_attacker + Ka2 * ra [3]
-        Ka1 = K_set(:,:,i_2);
-        ClosedLoop_A = A_comp(:,:,i_2) + B_att*Ka1;
-        M = C_att * inv(eye(n_total) - ClosedLoop_A) * B_att;
-        Ka2 = pinv(M); 
-        u_a = Ka1 * x_hat_a + Ka2 * ra;
-        %u_a = zeros(3,1);
+        u_a_calc = Ka1 * x_hat_a + Ka2 * ra;
+        %u_a = u_a_calc; % Ataca ambas as plantas
+        u_a(1:m_sys) = u_a_calc(1:m_sys); % Ataca apenas a planta física
         
         % 2. The attacker simulates the effect of the attack on their internal model to generate ya
         % ya(k) is the signal that will be subtracted from the real output to hide the attack
         y_a = C_att * xa;
         
         % 3. Updates the internal model state of the attacker (xa)
-        xa = A_comp(:,:,i_2) * xa + B_att * u_a;
-       
+        xa = A_att * xa + B_att * u_a;
+        
         % 4. The attacker updates their estimate of the real state (x_hat_a)
         % (Simulates an internal Kalman Filter of the hacker)
         % Note: y_real_k is obtained from the previous step or from the plant
-        y_real_atual = C_comp * x_real(:,k) + E_comp * vk; % Reading intercepted by the hacker
-        x_hat_a = A_comp(:,:,i_2) * x_hat_a + B_att * (u_nominal(:,k) + u_a) + ...
-                  La_set * (y_real_atual - C_att * x_hat_a);
-
-    else
-        y_real_atual = C_comp * x_real(:,k) + E_comp * vk; % Reading intercepted by the hacker
-        x_hat_a = A_comp(:,:,i_2) * x_hat_a + B_att * (u_nominal(:,k) + u_a) + ...
+        y_real_atual = C_comp(:,:,i) * x_real(:,k) + E_comp * vk; % Reading intercepted by the hacker
+        x_hat_a = A_att * x_hat_a + B_att * (u_nominal(:,k) + u_a) + ...
                   La_set * (y_real_atual - C_att * x_hat_a);
     end
 
     % STEP B: Real System Dynamics
     % The physical system receives the nominal control + the attack
     u_total = u_nominal(:,k) + u_a;
-    x_real(:, k+1) = A_comp(:,:,i)*x_real(:,k) + B_comp*u_total + D_comp*wk;
+    x_real(:, k+1) = A_comp(:,:,i)*x_real(:,k) + B_comp(:,:,i)*u_total + D_comp*wk;
 
     % STEP C: Compromised Measurements
     % What the controller and observer receive is y(k) subtracted by ya(k)
-    y_compromised = (C_comp * x_real(:,k) + E_comp * vk) - y_a;
+    y_compromised = (C_comp(:,:,i) * x_real(:,k) + E_comp * vk) - y_a;
 
-    %% Recursive Kalman Filter
+    %%
 
     % --- STEP D: Kalman Filter for MJLS (Algorithm 2.2) ---
     % D.1 Filtering Stage
 
-    S_k = R_comp + C_comp * P_cov * C_comp'; 
-    K_kalman = (P_cov * C_comp') / S_k; 
+    S_k = R_comp + C_comp(:,:,i) * P_cov * C_comp(:,:,i)'; 
+    K_kalman = (P_cov * C_comp(:,:,i)') / S_k; 
 
     % D.2 Calculation of Residual d_aux,k BEFORE the k+1 update (Eq. 14 / 4.10)
     % d_aux = y_star_auxiliary - y_hat_auxiliary (Innovation of the 2nd line)
-    y_hat = C_comp * x_hat(:,k);
+
+    y_hat = C_comp(:,:,i) * x_hat(:,k);
 
     % D.3 Update and Prediction for k+1
-    x_hat_filter = x_hat(:,k) + K_kalman * (y_compromised - C_comp * x_hat(:,k));
-    P_filter = P_cov - K_kalman * C_comp * P_cov;
+    x_hat_filter = x_hat(:,k) + K_kalman * (y_compromised - C_comp(:,:,i) * x_hat(:,k));
+    P_filter = P_cov - K_kalman * C_comp(:,:,i) * P_cov;
 
-    x_hat(:, k+1) = A_comp(:,:,i_2) * x_hat_filter + B_comp * u_nominal(:,k);
-    P_cov = Q_comp + A_comp(:,:,i_2) * P_filter * A_comp(:,:,i_2)';
+    x_hat(:, k+1) = A_comp(:,:,i) * x_hat_filter + B_comp(:,:,i) * u_nominal(:,k);
+    P_cov = Q_comp + A_comp(:,:,i) * P_filter * A_comp(:,:,i)';
 
     %%
     
@@ -370,8 +288,10 @@ for k = 1:T_sim-1
     % residuos(:,k) = abs(y_comprometido - y_hat);
     residuals(:,k) = y_compromised - y_hat;
 
-    y_plot(:,k) = y_a;
-    y_c_plot(:,k) = y_compromised;
+    y_real = C_comp(:,:,i)*x_real(:,k) + E_comp*vk;
+    
+    y_plot(:,k) = y_compromised;
+    y_plot_2(:,k) = y_real;
     y_hat_plot(:,k) = y_hat;
 end
 
@@ -456,14 +376,14 @@ grid on;
 % Adjusting axis colors and inner background to black
 set(gca, 'Color', 'k', 'XColor', 'w', 'YColor', 'w', 'GridColor', [0.5 0.5 0.5]); 
 
-title('Real System Outputs (Plant + Auxiliary)', 'Interpreter', 'tex', 'Color', 'w');
+title('Masked Outputs (Plant + Auxiliary)', 'Interpreter', 'tex', 'Color', 'w');
 xlabel('k', 'Color', 'w');
 ylabel('y_{real}', 'Interpreter', 'tex', 'Color', 'w');
 
 % Adjusting the legend to a black background and white text
 legend('y_{sys1}', 'y_{sys2}', 'y_{aux1}', 'y_{aux2}', ...
        'Location', 'bestoutside', 'TextColor', 'w', 'EdgeColor', 'w');
-ylim([-0.5 0.5]);
+ylim([-0.5 1]);
 
 % Figure 2.2
 % --- Subplot 2: Kalman Filter Estimates ---
@@ -481,23 +401,36 @@ ylabel('$\hat{y}$', 'Interpreter', 'latex', 'Color', 'w');
 % Adjusting the legend to a black background and white text
 legend('$\hat{y}_{sys1}$', '$\hat{y}_{sys2}$', '$\hat{y}_{aux1}$', '$\hat{y}_{aux2}$', ...
        'Location', 'bestoutside', 'Interpreter', 'latex', 'TextColor', 'w', 'EdgeColor', 'w');
-ylim([-0.5 0.5]);
+ylim([-0.5 1]);
 
 % Figure 3
-% --- Subplot 3: Masked Output ---
-figure('Name', 'Output Analysis: Masked', 'Color', 'k');
+figure('Color','k','Name','System Outputs');
 
-plot(y_c_plot(:, 1:T_sim-1)', 'LineWidth', 1.5);
-grid on;
+hold on; grid on;
 
-% Adjusting axis colors and inner background to black
-set(gca, 'Color', 'k', 'XColor', 'w', 'YColor', 'w', 'GridColor', [0.5 0.5 0.5]);
+plot(y_plot_2(1,1:T_sim-1),'LineWidth',1.5);
+plot(y_plot_2(2,1:T_sim-1),'LineWidth',1.5);
+plot(y_plot_2(3,1:T_sim-1),'LineWidth',1.5);
+plot(y_plot_2(4,1:T_sim-1),'LineWidth',1.5);
 
-title('Compromised output ($y_{sys2}$)', 'Interpreter', 'latex', 'Color', 'w');
-xlabel('k', 'Color', 'w');
-ylabel('$\hat{y}$', 'Interpreter', 'latex', 'Color', 'w');
+xline(1000,'--k','Attack Start','LabelVerticalAlignment','top');
+xline(3000,':r','Mode Switch','LabelVerticalAlignment','middle');
 
-% Adjusting the legend to a black background and white text
-legend('y_{sys1}', 'y_{sys2}', 'y_{aux1}', 'y_{aux2}', ...
-       'Location', 'bestoutside', 'Interpreter', 'latex', 'TextColor', 'w', 'EdgeColor', 'w');
-ylim([-0.5 0.5]);
+set(gca,...
+    'Color','k',...
+    'XColor','w',...
+    'YColor','w',...
+    'GridColor',[0.5 0.5 0.5]);
+
+title('Real System Outputs','Color','w');
+ylabel('y_{real}','Color','w');
+
+legend({'y_{sys,1}','y_{sys,2}','y_{aux,1}','y_{aux,2}'},...
+       'Location','bestoutside',...
+       'TextColor','w',...
+       'EdgeColor','w');
+
+xlim([0 T_sim]);
+
+hold off;
+

@@ -1,6 +1,12 @@
-clc; clear; close all;
+clc; clear; %close all;
 
-rng(1952777514)
+
+rng(1952777514) % seed 'bonita'
+%rng(1952521639) % seed problemática
+
+% rng("shuffle")
+% s = rng;
+% disp(s.Seed);
 
 %% System Matrices:
 
@@ -14,9 +20,42 @@ B_sys = [0.0478,0.0010;
          0.0000,0.0765;
          0.0554,0.0000];
 
-C_sys = [0.5,0.0,0.0,0.0
-         0.0,0.5,0.0,0.0];
+C_sys = [0.5,0.0,0.5,0.0
+         0.0,0.5,0.0,0.5];
 
+% Transition Probability Matrix for modes 1 and 2 only
+P_matrix = [0.77, 0.23; 
+            0.36, 0.64];
+
+% P_matrix = [
+%     0.1238, 0.3142, 0.2419, 0.1978, 0.0516, 0.0515, 0.0192;
+%     0.2057, 0.1428, 0.1682, 0.0049, 0.2303, 0.1977, 0.0504;
+%     0.0719, 0.0725, 0.1203, 0.2075, 0.1708, 0.1151, 0.2419;
+%     0.0507, 0.1061, 0.1331, 0.1656, 0.2852, 0.0725, 0.1868;
+%     0.1744, 0.0137, 0.1789, 0.0502, 0.0191, 0.2794, 0.2843;
+%     0.2738, 0.1032, 0.0331, 0.2318, 0.1491, 0.0413, 0.1677;
+%     0.0106, 0.2804, 0.0798, 0.2043, 0.0961, 0.1603, 0.1685
+% ];
+ 
+% P_matrix = [0.999, 0.001; 
+%             0.001, 0.999];
+
+% P_matrix = [0.99, 0.01; 
+%             0.01, 0.99];
+
+% Checa a presença de zeros instáveis
+
+% % Defina o sistema
+% sys = ss(A_sys, B_sys, C_sys, 0, 1); % 1 é o tempo de amostragem Ts
+% 
+% % Encontre os zeros de transmissão
+% zeros_sistema = tzero(sys);
+% 
+% 
+% % Filtre para mostrar apenas os instáveis (|z| > 1)
+% zeros_instaveis = zeros_sistema(abs(zeros_sistema) > 1);
+% disp('Zeros instáveis encontrados:');
+% disp(zeros_instaveis);
 
 %% Auxiliary systems:
 
@@ -35,14 +74,17 @@ l = 3; % size(P_matrix) + 1
 theta_u = 1;
 theta_y = 1;
 
-% --- Input Parameters ---
+% --- Parâmetros de Estabilidade ---
 is_stable = false;
 attempt = 1;
-max_attempts = 500;
+max_attempts = 1000;
 tolerance = 1e-6; % Tolerance for strict inequality
 
-% YALMIP settings to use SeDuMi as the solver
-ops = sdpsettings('solver', 'sedumi', 'verbose', 0);
+% --- Matrix Dimensions ---
+% Original plant dimensions
+n_sys = size(A_sys, 1); % Number of states
+p_sys = size(C_sys, 1); % Number of outputs (sensors)
+m_sys = size(B_sys, 2); % Number of inputs (actuators)
 
 while ~is_stable && attempt <= max_attempts
     % 1. Matrix Generation via Truncated Normal Distribution (TND)
@@ -52,91 +94,74 @@ while ~is_stable && attempt <= max_attempts
      Truncated_Normal_Distribution(A_sys, B_sys, C_sys, tau_real_A, ...
      tau_im_A, n_aux, m_aux, p_aux, theta_u, theta_y, l);
 
-    % 2. Define Decision Variables in YALMIP
-    % sdpvar(n, n) automatically creates a symmetric matrix P
-    P = sdpvar(n_aux, n_aux); 
+    n_total = n_sys + n_aux;
 
-    % 3. Define Constraints (LMIs)
-    % Condition 1: P must be positive definite (P > 0)
-    Constraints = [P >= tolerance * eye(n_aux)];
-    
-    % Condition 2: Common Lyapunov Function for Arbitrary Switching
-    % A_sigma_Aux * P * A_sigma_Aux' - P < 0 must hold for all l modes simultaneously
+    % Montagem temporária de A_comp para o teste
+    A_temp = zeros(n_total, n_total, l);
     for i = 1:l
-        Ai = A_aux_set(:,:,i);
-        Constraints = [Constraints, Ai * P * Ai' - P <= -tolerance * eye(n_aux)];
+        A_temp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
+                         A_coup,              A_aux_set(:,:,i)];
     end
 
-    % 4. Solve the Feasibility Problem
-    sol = optimize(Constraints, [], ops);
+    % 2. CONSTRUÇÃO DA MATRIZ AUMENTADA A1 (Fonte: Eq. 3.12d [cite: 386])
+    % N = diag(A1 ⊗ A1, A2 ⊗ A2, ..., Al ⊗ Al)
+    N_blocks = cell(1, l);
+    for i = 2:l
+        N_blocks{i} = kron(A_temp(:,:,i), A_temp(:,:,i));
+    end
+    N_matrix = blkdiag(N_blocks{:});
+    
+    % C = (P_matrix' ⊗ I_{n_total^2})
+    C_matrix = kron(P_matrix', eye(n_total^2));
+    
+    % Matriz de momentos A1 = C * N
+    A1 = C_matrix * N_matrix;
 
-    % 5. Verify the Results
-    if sol.problem == 0 % 0 indicates that a feasible solution was found
+    % 3. TESTE DO RAIO ESPECTRAL
+    raio_espectral = max(abs(eig(A1)));
+    
+    if raio_espectral < 1
         is_stable = true;
-        fprintf('Success! Stable matrix set found on attempt %d.\n', attempt);
-        P_final = value(P); % Extract the numerical value of P
+        A_comp = A_temp; % Salva o conjunto estável
+        fprintf('Estabilidade MSS garantida na tentativa %d (Raio: %.4f)\n', attempt, raio_espectral);
     else
-        if mod(attempt, 10) == 0
-            fprintf('Attempt %d: No common Lyapunov function found. Retrying...\n', attempt);
-        end
         attempt = attempt + 1;
     end
 end
 
 if ~is_stable
-    error('Could not find a stable matrix set within the maximum number of attempts.');
+    error('Não foi possível encontrar um conjunto MSS estável após %d tentativas.', max_attempts);
 end
-
-
 
 %% Extended Matrices
 
-% --- Matrix Dimensions ---
-% Original plant dimensions
-n_sys = size(A_sys, 1); % Number of states
-p_sys = size(C_sys, 1); % Number of outputs (sensors)
-m_sys = size(B_sys, 2); % Number of inputs (actuators)
-
+    
 % Auxiliary system dimensions
 n_aux = size(A_aux_set, 1); % Number of auxiliary states
 p_aux = size(C_aux, 1);     % Number of auxiliary outputs
 m_aux = size(B_aux, 2);     % Number of auxiliary inputs
-
-% --- Initialization of Extended Matrices ---
-% The state matrix A changes according to the switching signal sigma (l modes)
-A_comp = zeros(n_sys + n_aux, n_sys + n_aux, l);
-
-for i = 1:l
-    % Assembly of the extended A matrix for each mode i
-    % Structure: [ A_sys    0   ]
-    %            [ A_coup   A_i ]
-    % A_comp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
-    %                  zeros(n_aux, n_sys),              A_aux_set(:,:,i)];
-    A_comp(:,:,i) = [A_sys,               zeros(n_sys, n_aux); 
-                     A_coup,              A_aux_set(:,:,i)];
-end
-
+        
 % --- Constant Extended B and C Matrices ---
 % Note: In this model, B_aux and C_aux are constant across all modes.
-
+    
 % Extended Input Matrix (B_comp)
 % Structure: [ B_sys    0     ]
 %            [ B_coup   B_aux ]
 B_comp = [B_sys,               zeros(n_sys, m_aux);
-          zeros(n_aux, m_sys), B_aux];
+         zeros(n_aux, m_sys), B_aux];
 % B_comp = [B_sys,               zeros(n_sys, m_aux);
 %           B_coup,              B_aux];
-
+    
 % Extended Output Matrix (C_comp)
 % Structure: [ C_sys    0     ]
 %            [ C_coup   C_aux ]
 C_comp = [C_sys,               zeros(p_sys, n_aux);
-          zeros(p_aux, n_sys), C_aux];
+         zeros(p_aux, n_sys), C_aux];
 % C_comp = [C_sys,               zeros(p_sys, n_aux);
 %           C_coup,              C_aux];
-
+    
 fprintf('Extended System matrices (A_comp, B_comp, C_comp) successfully built.\n');
-
+    
 % --- Dimensions ---
 n_total = n_sys + n_aux;
 p_total = p_sys + p_aux;
@@ -148,7 +173,6 @@ p_total = p_sys + p_aux;
 A_att = A_comp(:,:,1);
 B_att = B_comp;
 C_att = C_comp;
-
 % Function calls to calculate the attacker's controller and observer gains
 [Ka1, Ka2] = calculateAttackerController(A_att, B_att, C_att);
 La_set = calculateAttackerObserver(A_att, C_att);
@@ -171,22 +195,23 @@ x_real = zeros(n_total, T_sim);    % Real state of the extended system
 x_hat  = zeros(n_total, T_sim);    % Estimated state by the observer
 x_a    = zeros(n_total, T_sim);    % Internal state of the attacker model
 
+% x_a(:,1) = 0.5*ones(n_total,1);
+% x_real(:,1) = 0.5*ones(n_total,1);
+% x_hat(:,1) = 0.5*ones(n_total,1);
+
 %% Markov Chain Generation
 
 theta_0 = 1;
 k_markov_start = 3000;    % Start of Markov chain switching
-
-% Transition Probability Matrix for modes 1 and 2 only
-P_matrix = [0.77, 0.23; 
-            0.36, 0.64];
+%k_markov_end = 7000;
             
 % S is the cumulative probability matrix to facilitate sampling 
 S = cumsum(P_matrix, 2);
-
+num_modes = size(P_matrix,2);
 theta = zeros(1, T_sim);
 theta(1:k_markov_start-1) = theta_0; 
 
-modo_atual = 2; % We start in mode 1 after mode 3
+modo_atual = 1; % We start in indice 1 of the probability transition matrix
 
 for k = k_markov_start:T_sim
 
@@ -194,13 +219,49 @@ for k = k_markov_start:T_sim
     
     if k < T_sim
         R_k = rand();
-        if R_k <= S(modo_atual, 1)
-            modo_atual = 1;
-        else
-            modo_atual = 2;
-        end
+        modo_atual = find(R_k <= S(modo_atual, :), 1, 'first');
     end
 end
+%%
+
+% --- Aumento do Sistema para Controle Servo (Ogata) ---
+n_aug = n_total + p_total; 
+A_servo = zeros(n_aug, n_aug, l);
+B_servo = zeros(n_aug, m_sys + m_aux, l);
+
+for i = 1:l
+    % Matriz A aumentada: [ A  0 ; -C  I ] (Ogata p. 617 / [3, 4])
+    A_servo(:,:,i) = [A_comp(:,:,i),            zeros(n_total, p_total);
+                      -C_comp,           eye(p_total)];
+    % Matriz B aumentada: [ B ; 0 ]
+    B_servo(:,:,i) = [B_comp; 
+                      zeros(p_total, m_sys + m_aux)];
+end
+
+% Matriz de transferência do sistema avaliada em z=1. matriz de Rosenbrock
+A_teste = [eye(size(A_comp(:,:,1)))-A_comp(:,:,1),-B_comp;
+           C_comp,zeros(size(C_comp,1),size(B_comp,2))]
+
+% Ajuste dos pesos LQR e Riccati para o novo tamanho n_aug [cite: 25, 476]
+Q_lqr_aug = eye(n_aug); 
+Q_lqr_aug(n_total+1:end, n_total+1:end) = 50 * eye(p_total); % Peso no erro
+R_lqr = 0.5*eye(m_sys + m_aux);      % Control weighting matrix
+P_riccati = zeros(n_aug, n_aug, l);
+for i = 1:l, P_riccati(:,:,i) = eye(n_aug); end
+
+v_int = zeros(p_total, T_sim); % Estado do integrador (erro acumulado)
+K_set = zeros(m_sys + m_aux, n_aug, l);
+
+% Inicialização externa para evitar erros de escopo e garantir operação nominal
+u_a = zeros(m_sys + m_aux, 1); 
+y_a = zeros(p_total, 1);
+r_nom = 0.5 * ones(p_total, 1);
+r0 = C_comp*x_real(:,1);    % saída correspondente ao estado inicial
+N_ramp = 500;
+va_int = zeros(p_total, 1); 
+
+P_matrix_aug = blkdiag(P_matrix,1);
+
 
 %%
 % --- Definition of Inputs (u_sys and u_aux) ---
@@ -216,36 +277,113 @@ Q_comp = D_comp * D_comp';
 R_comp = E_comp * E_comp';
 P_cov = 0.1 * eye(n_total);     % P_0|-1 (Initial covariance matrix)
 
+
+% % --- Parameters for the Recursive Computation of K_set (LQR) ---
+% Q_lqr = eye(n_total);            % State weighting matrix
+%R_lqr = eye(m_sys + m_aux);      % Control weighting matrix
+% P_riccati = zeros(n_total, n_total, l); % Riccati matrices for each mode
+% for i = 1:l
+%     P_riccati(:,:,i) = eye(n_total); % Initialization
+% end
+% K_set = zeros(m_sys + m_aux, n_total, l); % Control gains
+
 for k = 1:T_sim-1
     i = theta(k); % Identifies the active mode at the current time instant
 
     % --- Generation of Gaussian Noise (Zero mean) ---
     wk = 1*randn(n_total, 1); % Process disturbance
     vk = 1*randn(p_total, 1); % Measurement noise
+
+    %% Recursive Controller
+
+    % 1. INTEGRATOR UPDATE (Ogata Eq. 8-73)
+    % Measurement perceived by the controller (hiding the attack influence ya)
+    y_star = (C_comp * x_real(:,k) + E_comp * randn(p_total,1)) - y_a;
+    
+    if k <= N_ramp
+        alpha = k/N_ramp;
+        r = (1-alpha)*r0 + alpha*r_nom;
+    else
+        r = r_nom;
+    end
+
+    if k > 1
+        v_int(:,k) = v_int(:,k-1) + (r - y_star); 
+    else
+        v_int(:,k) = (r - y_star);
+    end
+
+    % 2. RECURSIVE GAIN CALCULATION (Coupled Riccati Equations)
+    Psi_i = zeros(n_aug, n_aug);
+    for j = 1:l
+        if i <= size(P_matrix_aug, 1) && j <= size(P_matrix_aug, 2)
+            Psi_i = Psi_i + P_riccati(:,:,j) * P_matrix_aug(i, j);
+        end
+    end
+
+    % Gain calculation for the augmented system
+    As = A_servo(:,:,i);
+    Bs = B_servo(:,:,i);
+    K_set(:,:,i) = -(R_lqr + Bs' * Psi_i * Bs) \ (Bs' * Psi_i * As);
+    P_riccati(:,:,i) = As' * (Psi_i - Psi_i * Bs * ((R_lqr + Bs' * Psi_i * Bs) \ (Bs' * Psi_i))) * As + Q_lqr_aug;
+
+    % 3. NOMINAL CONTROL (Augmented state vector [x_hat ; v_int])
+    % The control law combines the estimated state and the integrated error
+    %u_nominal(:,k) = K_set(:,:,i) * [x_hat(:,k); v_int(:,k)];
+    %%
+
+    gamma = 0.02;
+
+    if k == 1
+        K_applied = K_set(:,:,i);
+    else
+        K_applied = (1-gamma)*K_applied + gamma*K_set(:,:,i);
+    end
+    
+    u_nominal(:,k) = K_applied*[x_hat(:,k); v_int(:,k)];
+    %%
     
     % STEP A: Attacker Logic
     % The attacker injects ua(k) and tries to compensate with ya(k)
     % In this example, ua starts at k=1000 and is a ramp limited to 0.5
-    u_a = zeros(m_sys + m_aux, 1);
-    y_a = zeros(p_sys + p_aux, 1);
     
-    if k >=1000  % && k <= 7000
-        % 1. Calculates the attack input signal (ua) using the function gains
-        u_a_calc = Ka1 * x_hat_a + Ka2 * ra;
-        %u_a = u_a_calc; % Ataca ambas as plantas
-        u_a(1:m_sys) = u_a_calc(1:m_sys); % Ataca apenas a planta física
+    if k >= 1000
         
-        % 2. The attacker simulates the effect of the attack on their internal model to generate ya
-        % ya(k) is the signal that will be subtracted from the real output to hide the attack
+        ra_ramp = (ra - r_nom) * min((k - 1000) / 1000, 1); 
+        % 1. Evolução do Integrador do Atacante
+        % erro_a = (ra - y_a_modelo_interno)
+        if k > 1
+            va_int = va_int + (ra_ramp - (C_att * xa));  
+        end
+
+        % 2. Nova Lei de Controle do Atacante (LQI)
+        u_a_calc = Ka1 * xa + Ka2 * va_int; 
+
+        % 3. FILTERING: Forces the attack to act ONLY on the real system
+        % We keep the first m_sys inputs and zero out the remaining m_aux ones
+        %u_a = zeros(m_sys + m_aux, 1);
+        u_a = u_a_calc; % Ataca ambas as plantas
+        %u_a(1:m_sys) = u_a_calc(1:m_sys); % Ataca apenas a planta física
+              
+        % 4. The attacker generates ya to hide ONLY the effect of this restricted ua
+        % Since ua_aux = 0, ya_aux will be zero if the system is decoupled [cite: 66, 68, 191]
         y_a = C_att * xa;
         
-        % 3. Updates the internal model state of the attacker (xa)
+        % 4. Internal model state (xa) evolution with the restricted ua
         xa = A_att * xa + B_att * u_a;
         
-        % 4. The attacker updates their estimate of the real state (x_hat_a)
-        % (Simulates an internal Kalman Filter of the hacker)
-        % Note: y_real_k is obtained from the previous step or from the plant
-        y_real_atual = C_comp * x_real(:,k) + E_comp * vk; % Reading intercepted by the hacker
+        % 5. Updating the hacker's estimate (x_hat_a)
+        % The hacker intercepts the real measurement and uses their model to estimate the state
+        % Note: C_comp(:,:,i) should be used if the output matrix changes with the mode [cite: 61, 240]
+        y_real_atual = C_comp * x_real(:,k) + E_comp * vk; 
+        
+        % Attacker's internal Kalman Filter [cite: 65, 252, 272]
+        x_hat_a = A_att * x_hat_a + B_att * (u_nominal(:,k) + u_a) + ...
+                  La_set * (y_real_atual - C_att * x_hat_a);
+
+    else
+        % Case without attack: u_a and y_a remain zero (initialized outside)
+        y_real_atual = C_comp * x_real(:,k) + E_comp * vk;
         x_hat_a = A_att * x_hat_a + B_att * (u_nominal(:,k) + u_a) + ...
                   La_set * (y_real_atual - C_att * x_hat_a);
     end
@@ -259,7 +397,7 @@ for k = 1:T_sim-1
     % What the controller and observer receive is y(k) subtracted by ya(k)
     y_compromised = (C_comp * x_real(:,k) + E_comp * vk) - y_a;
 
-    %%
+    %% Recursive Kalman Filter
 
     % --- STEP D: Kalman Filter for MJLS (Algorithm 2.2) ---
     % D.1 Filtering Stage
@@ -269,7 +407,6 @@ for k = 1:T_sim-1
 
     % D.2 Calculation of Residual d_aux,k BEFORE the k+1 update (Eq. 14 / 4.10)
     % d_aux = y_star_auxiliary - y_hat_auxiliary (Innovation of the 2nd line)
-
     y_hat = C_comp * x_hat(:,k);
 
     % D.3 Update and Prediction for k+1
@@ -291,6 +428,7 @@ for k = 1:T_sim-1
     y_plot(:,k) = y_compromised;
     y_plot_2(:,k) = y_real;
     y_hat_plot(:,k) = y_hat;
+
 end
 
 % Selects only the auxiliary system outputs for detection
@@ -381,7 +519,7 @@ ylabel('y_{real}', 'Interpreter', 'tex', 'Color', 'w');
 % Adjusting the legend to a black background and white text
 legend('y_{sys1}', 'y_{sys2}', 'y_{aux1}', 'y_{aux2}', ...
        'Location', 'bestoutside', 'TextColor', 'w', 'EdgeColor', 'w');
-ylim([-0.5 1]);
+%ylim([-0.5 1]);
 
 % Figure 2.2
 % --- Subplot 2: Kalman Filter Estimates ---
@@ -399,7 +537,7 @@ ylabel('$\hat{y}$', 'Interpreter', 'latex', 'Color', 'w');
 % Adjusting the legend to a black background and white text
 legend('$\hat{y}_{sys1}$', '$\hat{y}_{sys2}$', '$\hat{y}_{aux1}$', '$\hat{y}_{aux2}$', ...
        'Location', 'bestoutside', 'Interpreter', 'latex', 'TextColor', 'w', 'EdgeColor', 'w');
-ylim([-0.5 1]);
+%ylim([-0.5 1]);
 
 % Figure 3
 figure('Color','k','Name','System Outputs');
