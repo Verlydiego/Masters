@@ -1,0 +1,9 @@
+Contém os códigos:
+
+calculateAttackerController - calcula o controle a ser usado pelo atacante usando a função dlqr.
+calculateAttackerObserver - utiliza o dlqe para calcular o ganho no SS do KF a ser utilizado pelo atacante.
+main_FS_LO - código principal com mudanças fixas e o observador de Luenberger
+main_MJLS_KF - código principal usando MJLS e o filtro de kalman
+main_MJLS_KF_Closed_Loop - código principal usando MJLS, o filtro de kalman e uma realimentação negativa de estados
+main_MJLS_LO - código principal usando MJLS e o observador de Luenberger
+Truncated_Normal_Distribution - gera as matrizes auxiliares, com A, B e C variando.
